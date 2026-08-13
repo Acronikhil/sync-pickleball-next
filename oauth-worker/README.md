@@ -37,4 +37,4 @@ curl -i -X POST https://sync-pickleball-oauth.<subdomain>.workers.dev \
 # expect: 403 {"error":"origin_not_allowed"}
 ```
 
-Full setup walkthrough: [`../docs/ADMIN-SETUP.md`](../docs/ADMIN-SETUP.md).
+Full setup walkthrough: [`../README.md`](../README.md).

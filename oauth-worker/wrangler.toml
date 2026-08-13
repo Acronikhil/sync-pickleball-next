@@ -7,8 +7,9 @@ compatibility_date = "2024-11-01"
 GITHUB_CLIENT_ID = "REPLACE_WITH_YOUR_OAUTH_CLIENT_ID"
 
 # Only these origins may exchange a code for a token. Comma-separated, no
-# trailing slash. Keep localhost here only while developing.
-ALLOWED_ORIGINS = "https://www.syncpickleball.com,https://syncpickleball.com,http://localhost:3000"
+# trailing slash. Add the production domain here too when this site takes over
+# from www. Drop localhost once you no longer run the admin panel locally.
+ALLOWED_ORIGINS = "https://cms.syncpickleball.com,http://localhost:3000"
 
 # GITHUB_CLIENT_SECRET is NOT set here — it is a secret:
 #   npx wrangler secret put GITHUB_CLIENT_SECRET

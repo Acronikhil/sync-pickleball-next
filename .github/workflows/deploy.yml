@@ -46,6 +46,10 @@ jobs:
           NEXT_PUBLIC_REPO_NAME: ${{ github.event.repository.name }}
           NEXT_PUBLIC_REPO_BRANCH: main
           NEXT_PUBLIC_ADMIN_USERS: ${{ vars.ADMIN_USERS }}
+          # Canonical URL, and whether search engines may index this site. Both
+          # stay pointed at the subdomain until it replaces www — see README.
+          NEXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL || 'https://cms.syncpickleball.com' }}
+          NEXT_PUBLIC_ALLOW_INDEXING: ${{ vars.ALLOW_INDEXING }}
         run: npm run build
 
       - uses: actions/upload-pages-artifact@v3

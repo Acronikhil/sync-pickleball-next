@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { siteConfig } from "@/site.config";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.syncpickleball.com"),
+  metadataBase: new URL(siteConfig.site.url),
   title: "Sync Pickleball – Premium Pickleball Club & Café in Indore",
   description:
     "Join Sync Pickleball, Indore’s first premium pickleball club and café. Play on pro-grade courts, enjoy great food & drinks, and be part of our vibrant pickleball community. Book your slot today!",
@@ -15,7 +16,10 @@ export const metadata: Metadata = {
     "play pickleball",
     "pickleball gear",
   ],
-  robots: { index: true, follow: true },
+  // Off by default on this subdomain — see siteConfig.site.allowIndexing.
+  robots: siteConfig.site.allowIndexing
+    ? { index: true, follow: true }
+    : { index: false, follow: false },
   icons: { icon: "/assets/favicon_io_sync/favicon_2.ico" },
   alternates: { canonical: "/" },
 };
@@ -29,8 +33,8 @@ const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "SportsActivityLocation",
   name: "Sync Pickleball",
-  url: "https://www.syncpickleball.com/",
-  logo: "https://www.syncpickleball.com/assets/logo.png",
+  url: `${siteConfig.site.url}/`,
+  logo: `${siteConfig.site.url}/assets/logo.png`,
 };
 
 export default function RootLayout({

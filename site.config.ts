@@ -16,8 +16,23 @@ export const siteConfig = {
   /** Repo the admin panel reads content from and commits content back to. */
   repo: {
     owner: env.NEXT_PUBLIC_REPO_OWNER ?? "Acronikhil",
-    name: env.NEXT_PUBLIC_REPO_NAME ?? "Sync-Pickleball",
+    name: env.NEXT_PUBLIC_REPO_NAME ?? "sync-pickleball-next",
     branch: env.NEXT_PUBLIC_REPO_BRANCH ?? "main",
+  },
+
+  site: {
+    /** Canonical origin, no trailing slash. Drives metadata and schema.org. */
+    url: env.NEXT_PUBLIC_SITE_URL ?? "https://cms.syncpickleball.com",
+    /**
+     * Search engines are blocked unless this is explicitly turned on.
+     *
+     * This subdomain serves the same content as www.syncpickleball.com, and two
+     * indexed copies of one page compete with each other — Google picks a
+     * winner and it may not be the one you want. Leave indexing off until this
+     * site *replaces* www; then set NEXT_PUBLIC_ALLOW_INDEXING=true and point
+     * NEXT_PUBLIC_SITE_URL at the live domain.
+     */
+    allowIndexing: env.NEXT_PUBLIC_ALLOW_INDEXING === "true",
   },
 
   /** Path within the repo that holds the editable content. */
@@ -37,7 +52,7 @@ export const siteConfig = {
     proxyUrl: env.NEXT_PUBLIC_OAUTH_PROXY_URL ?? "",
     /**
      * "public_repo" is enough for a public repo. Switch to "repo" only if you
-     * make Sync-Pickleball private.
+     * make this repository private.
      */
     scope: env.NEXT_PUBLIC_OAUTH_SCOPE ?? "public_repo",
   },

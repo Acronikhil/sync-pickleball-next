@@ -673,7 +673,7 @@ function LoginScreen({ status }: { status: Status }) {
               <ol style={{ paddingLeft: "1.1rem", margin: "0.5rem 0 0" }}>
                 <li>
                   Create a GitHub OAuth App with callback URL{" "}
-                  <code>{origin || "https://www.syncpickleball.com"}/admin/callback/</code>
+                  <code>{origin || siteConfig.site.url}/admin/callback/</code>
                 </li>
                 <li>
                   Deploy <code>oauth-worker/</code> to Cloudflare and set{" "}
@@ -686,7 +686,8 @@ function LoginScreen({ status }: { status: Status }) {
                 </li>
               </ol>
               <p style={{ margin: "0.6rem 0 0" }}>
-                Full instructions are in <code>docs/ADMIN-SETUP.md</code>.
+                Full instructions are in the repository&rsquo;s{" "}
+                <code>README.md</code>.
               </p>
             </div>
           </>
