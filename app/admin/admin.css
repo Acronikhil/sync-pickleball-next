@@ -1,0 +1,498 @@
+/*
+ * Admin panel styles.
+ *
+ * Everything here is prefixed `a-` and lives outside `.site-root`, so the
+ * site's opinionated element rules (gradient-filled h1, 60vw paragraphs) never
+ * reach the editor chrome. The preview pane is the one place `.site-root`
+ * appears inside this page.
+ */
+
+.a-shell {
+  min-height: 100vh;
+  color: #e9e4f2;
+  font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.a-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1.25rem;
+  background: rgba(16, 8, 30, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #3a2b52;
+}
+
+.a-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.a-brand img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.a-spacer {
+  flex: 1 1 auto;
+}
+
+.a-user {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #b9aacd;
+}
+
+.a-user img {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+
+/* ------------------------------- layout ------------------------------- */
+
+.a-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 460px) minmax(0, 1fr);
+  align-items: start;
+  gap: 0;
+}
+
+@media (max-width: 1100px) {
+  .a-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .a-preview-pane {
+    display: none;
+  }
+
+  .a-layout[data-mobile-view="preview"] .a-preview-pane {
+    display: block;
+  }
+
+  .a-layout[data-mobile-view="preview"] .a-editor-pane {
+    display: none;
+  }
+}
+
+.a-editor-pane {
+  padding: 1.25rem;
+  border-right: 1px solid #33254a;
+  max-height: calc(100vh - 57px);
+  overflow-y: auto;
+}
+
+.a-preview-pane {
+  position: sticky;
+  top: 57px;
+  height: calc(100vh - 57px);
+  overflow-y: auto;
+  background: #150f24;
+}
+
+.a-preview-note {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9c8ab5;
+  background: rgba(21, 15, 36, 0.95);
+  border-bottom: 1px solid #2c2040;
+}
+
+/* Scroll reveal is disabled in the preview — otherwise unscrolled sections
+   would sit at opacity 0 and look broken while editing. */
+.a-preview-pane [data-aos] {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.a-mobile-toggle {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .a-mobile-toggle {
+    display: inline-flex;
+  }
+}
+
+/* -------------------------------- cards -------------------------------- */
+
+.a-card {
+  border: 1px solid #382a52;
+  border-radius: 12px;
+  background: #1c1430;
+  margin-bottom: 0.85rem;
+  overflow: hidden;
+}
+
+.a-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: #22193a;
+}
+
+.a-disclosure {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.a-chevron {
+  color: #8f7bb0;
+  font-size: 0.8rem;
+}
+
+.a-kind {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: #a58fd0;
+  white-space: nowrap;
+}
+
+.a-summary {
+  color: #d7cfe6;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.a-card-body {
+  padding: 0.9rem 0.85rem 1.1rem;
+  border-top: 1px solid #2f2348;
+}
+
+.a-section-title {
+  margin: 1.6rem 0 0.7rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  color: #9c8ab5;
+}
+
+/* -------------------------------- fields -------------------------------- */
+
+.a-field {
+  margin-bottom: 0.85rem;
+}
+
+.a-label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #c4b6dc;
+}
+
+.a-input {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #40305d;
+  border-radius: 8px;
+  background: #120c20;
+  color: #f1ecf8;
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.a-input:focus {
+  outline: none;
+  border-color: var(--bg-color, #aa78dd);
+  box-shadow: 0 0 0 3px rgba(170, 120, 221, 0.18);
+}
+
+.a-textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.a-hint {
+  margin: 0.3rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #8d7ea6;
+}
+
+.a-error {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: #ff9a9a;
+}
+
+.a-check {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.85rem;
+  font-size: 0.85rem;
+  color: #c4b6dc;
+}
+
+/* -------------------------------- images -------------------------------- */
+
+.a-image-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 0.6rem;
+}
+
+.a-thumb {
+  width: 92px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #40305d;
+  background: #120c20;
+  flex: 0 0 auto;
+}
+
+.a-image-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.a-path {
+  font-size: 0.72rem;
+  color: #8d7ea6;
+  word-break: break-all;
+}
+
+/* ------------------------------- nesting ------------------------------- */
+
+.a-subsection {
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed #3a2b52;
+}
+
+.a-subsection-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.a-nested {
+  padding: 0.75rem;
+  margin-bottom: 0.7rem;
+  border: 1px solid #352748;
+  border-radius: 10px;
+  background: #171029;
+}
+
+.a-nested-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+  font-size: 0.85rem;
+  color: #d7cfe6;
+  min-width: 0;
+}
+
+.a-nested-head strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.a-row-actions {
+  display: flex;
+  gap: 0.25rem;
+  flex: 0 0 auto;
+}
+
+/* -------------------------------- buttons -------------------------------- */
+
+.a-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.95rem;
+  border: 1px solid #52407a;
+  border-radius: 8px;
+  background: #2a1f47;
+  color: #ece5f8;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.a-btn:hover:not(:disabled) {
+  background: #362a5c;
+  border-color: var(--bg-color, #aa78dd);
+}
+
+.a-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.a-btn-primary {
+  background: #7b3fc4;
+  border-color: #8f57d6;
+}
+
+.a-btn-primary:hover:not(:disabled) {
+  background: #8d4cdb;
+}
+
+.a-btn-quiet {
+  background: transparent;
+}
+
+.a-btn-sm {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.78rem;
+}
+
+.a-icon-btn {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #46356a;
+  border-radius: 6px;
+  background: #241a3d;
+  color: #cbbde3;
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.a-icon-btn:hover:not(:disabled) {
+  background: #34275a;
+  color: #fff;
+}
+
+.a-icon-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.a-danger:hover:not(:disabled) {
+  background: #6d2233;
+  border-color: #a9394f;
+  color: #ffd9df;
+}
+
+/* -------------------------------- status -------------------------------- */
+
+.a-status {
+  font-size: 0.82rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+}
+
+.a-status-idle {
+  color: #9c8ab5;
+}
+
+.a-status-dirty {
+  color: #ffd88a;
+  background: rgba(255, 190, 80, 0.1);
+}
+
+.a-status-ok {
+  color: #9ae6b4;
+  background: rgba(72, 187, 120, 0.12);
+}
+
+.a-status-err {
+  color: #ff9a9a;
+  background: rgba(229, 62, 62, 0.12);
+}
+
+/* ------------------------------ login screen ------------------------------ */
+
+.a-login {
+  max-width: 520px;
+  margin: 8vh auto;
+  padding: 2rem;
+  border: 1px solid #382a52;
+  border-radius: 16px;
+  background: #1c1430;
+  text-align: center;
+}
+
+.a-login h1 {
+  font-size: 1.4rem;
+  margin: 0 0 0.5rem;
+  color: #f1ecf8;
+}
+
+.a-login p {
+  color: #a897c2;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0 0 1.25rem;
+}
+
+.a-login-logo {
+  width: 64px;
+  margin: 0 auto 1rem;
+  display: block;
+}
+
+.a-setup {
+  text-align: left;
+  background: #150f24;
+  border: 1px solid #3a2b52;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-top: 1rem;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: #b9aacd;
+}
+
+.a-setup code {
+  color: #e9b8ff;
+  word-break: break-all;
+}
+
+.a-banner {
+  padding: 0.6rem 1.25rem;
+  font-size: 0.85rem;
+  background: rgba(255, 190, 80, 0.12);
+  color: #ffd88a;
+  border-bottom: 1px solid #4a3a1f;
+}

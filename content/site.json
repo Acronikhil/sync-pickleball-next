@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "hero": {
+    "id": "hero",
+    "type": "hero",
+    "logo": {
+      "src": "/assets/logo.png",
+      "alt": "Sync logo"
+    },
+    "heading": "SERVE. RALLY. SYNC.",
+    "body": "Sync is Indore’s first premium pickleball club and café, where pro-level courts meet laid-back vibes and a buzzing community of passionate players. Whether you’re just starting or smashing aces, you’ll feel right at home. Slots are limited, the energy is unmatched — don’t miss your chance to be part of it.",
+    "buttons": [
+      {
+        "id": "btn-hero-book",
+        "label": "Book Now",
+        "href": "https://hudle.in/venues/sync-pickleball-club-and-cafe-indore/649928",
+        "icon": "arrow-right",
+        "newTab": true,
+        "emphasis": "primary"
+      },
+      {
+        "id": "btn-hero-learn",
+        "label": "Learn More",
+        "href": "#feature-cafe",
+        "icon": "arrow-down",
+        "newTab": false,
+        "emphasis": "secondary"
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "feature-cafe",
+      "type": "feature",
+      "image": {
+        "src": "/assets/images/image01.jpg",
+        "alt": "Café seating at Sync Pickleball"
+      },
+      "imageSide": "left",
+      "title": "Serve, Sip, and Socialize!",
+      "body": "Recharge with tasty treats and refreshing drinks. The perfect spot to relax and share stories. Sip, snack, and chat in a cutesy café that’s made for post-match banter and pre-game boosts.",
+      "buttons": [
+        {
+          "id": "btn-cafe",
+          "label": "Explore Cafe",
+          "href": "",
+          "icon": "arrow-right",
+          "newTab": false,
+          "emphasis": "secondary"
+        }
+      ]
+    },
+    {
+      "id": "feature-courts",
+      "type": "feature",
+      "image": {
+        "src": "/assets/images/image02.jpg",
+        "alt": "Tournament-grade pickleball court"
+      },
+      "imageSide": "right",
+      "title": "Courts Crafted for Champions",
+      "body": "Built for bold moves and smooth landings. With 8-layer cushioning and tournament-grade bounce, our courts are built for serious play and smooth rallies. Aesthetic enough to flex on Insta, precise enough to ace that serve. Whether you’re chasing wins or viral highlights, we’ve got your back (and knees).",
+      "buttons": [
+        {
+          "id": "btn-gallery",
+          "label": "View Gallery",
+          "href": "",
+          "icon": "arrow-right",
+          "newTab": false,
+          "emphasis": "secondary"
+        }
+      ]
+    },
+    {
+      "id": "trio-amenities",
+      "type": "trio",
+      "cards": [
+        {
+          "id": "card-proshop",
+          "image": {
+            "src": "/assets/images/image03.jpg",
+            "alt": "Pro shop paddles and apparel"
+          },
+          "title": "Pro Shop,\n_On Point_",
+          "body": "From the freshest paddles to the slickest apparel, score must-have gear and level up your game. No detours. No fuss. Just grab what feels right and get back in the zone."
+        },
+        {
+          "id": "card-indoor",
+          "image": {
+            "src": "/assets/images/image04.jpg",
+            "alt": "Indoor court with open-air feel"
+          },
+          "title": "Indoor _Comfort,_\n_Outdoor Feels_",
+          "body": "Enjoy the best of both worlds. Fresh air, zero glare. Whether it shines or pours, the court's all yours."
+        },
+        {
+          "id": "card-hangout",
+          "image": {
+            "src": "/assets/images/image05.jpg",
+            "alt": "Hangout and green zones"
+          },
+          "title": "Pull Up,\n_Hang Out_",
+          "body": "Green pockets and hangout zones to unwind, connect, or simply do nothing (and love it). And spacious parking—because stressing about it isn’t on today’s to-do list."
+        }
+      ]
+    },
+    {
+      "id": "feature-community",
+      "type": "feature",
+      "image": {
+        "src": "/assets/images/image06.jpg",
+        "alt": "Players at a Sync Pickleball event"
+      },
+      "imageSide": "left",
+      "title": "Feel The Vibe, Join The Tribe!",
+      "body": "Tournaments, mixers, theme nights, and more. We bring people together, you just bring the energy. Dive into the action, meet new friends, and soak up the atmosphere.",
+      "buttons": [
+        {
+          "id": "btn-events",
+          "label": "Event Updates",
+          "href": "https://www.instagram.com/sync.idr",
+          "icon": "instagram",
+          "newTab": true,
+          "emphasis": "secondary"
+        }
+      ]
+    },
+    {
+      "id": "cta-book",
+      "type": "cta",
+      "heading": "Play Hard,\nChill Harder!",
+      "body": "Join the pickleball party! All levels welcome—grab your spot now!",
+      "buttons": [
+        {
+          "id": "btn-cta-book",
+          "label": "Book Now",
+          "href": "https://hudle.in/venues/sync-pickleball-club-and-cafe-indore/649928",
+          "icon": "arrow-right",
+          "newTab": true,
+          "emphasis": "primary"
+        }
+      ]
+    }
+  ],
+  "socials": [
+    {
+      "id": "social-phone",
+      "icon": "phone",
+      "href": "tel:+919203636803",
+      "label": "Call Sync Pickleball"
+    },
+    {
+      "id": "social-instagram",
+      "icon": "instagram",
+      "href": "https://www.instagram.com/sync.idr?igsh=MTAyYXl2MHo0cnF0eA==",
+      "label": "Sync Pickleball on Instagram"
+    },
+    {
+      "id": "social-email",
+      "icon": "envelope",
+      "href": "mailto:syncpickleball@gmail.com",
+      "label": "Email Sync Pickleball"
+    },
+    {
+      "id": "social-map",
+      "icon": "location",
+      "href": "https://maps.app.goo.gl/D3JxryD9MRJB3jgj9",
+      "label": "Find Sync Pickleball on Google Maps"
+    }
+  ],
+  "footer": {
+    "copyright": "© 2025 Sync Pickleball. All rights reserved.",
+    "creditPrefix": "Built with",
+    "creditName": "Nikhil Dubey",
+    "creditHref": "https://dubeynikhil.in"
+  },
+  "cursor": {
+    "enabled": true,
+    "image": "/assets/images/pickleball.png"
+  }
+}
