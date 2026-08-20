@@ -6,7 +6,7 @@ compatibility_date = "2024-11-01"
 # Google OAuth 2.0 Web client id. Public by design — must match
 # NEXT_PUBLIC_GOOGLE_CLIENT_ID exactly, since it's checked as the token's
 # audience.
-GOOGLE_CLIENT_ID = "REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID"
+GOOGLE_CLIENT_ID = "221453634176-ankmt5m52amd7o72rfgkndc4thtf083k.apps.googleusercontent.com"
 
 # Only these origins may call /publish. Comma-separated, no trailing slash.
 # Add the production domain here too when this site takes over from www. Drop
@@ -16,7 +16,7 @@ ALLOWED_ORIGINS = "https://cms.syncpickleball.com,http://localhost:3000"
 # Google accounts allowed to publish, comma-separated, case-insensitive. This
 # is the real access-control check — enforced here, server-side, not just in
 # the browser.
-ADMIN_EMAILS = "REPLACE_WITH_YOUR_GMAIL_ADDRESS"
+ADMIN_EMAILS = "20.nikhildubey@gmail.com,jayesh97manglani@gmail.com"
 
 # Repo the Worker commits to on the caller's behalf.
 REPO_OWNER = "Acronikhil"
