@@ -10,7 +10,7 @@ export function SiteFooter({
 }) {
   return (
     <>
-      <div className="d-flex justify-content-center gap-2 mb-xl-5">
+      <div className="flex justify-center gap-4 pb-4">
         {socials.map((social) => {
           const external = social.href.startsWith("http");
           return (
@@ -18,9 +18,8 @@ export function SiteFooter({
               key={social.id}
               href={social.href}
               aria-label={social.label}
-              {...(external
-                ? { target: "_blank", rel: "noopener noreferrer" }
-                : {})}
+              {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-lg text-white/70 transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-110 hover:border-funky-cyan hover:text-funky-cyan hover:shadow-lg hover:shadow-funky-cyan/20"
             >
               <SocialIcon name={social.icon} />
             </a>
@@ -28,24 +27,24 @@ export function SiteFooter({
         })}
       </div>
 
-      <footer className="py-4 text-white">
-        <div className="container d-flex justify-content-center align-items-center flex-column">
-          <p style={{ fontSize: 10 }}>{footer.copyright}</p>
-          <p style={{ fontSize: 15 }}>
-            {footer.creditPrefix}{" "}
-            <span className="animate__animated animate__heartBeat">
-              <i
-                className="fas fa-heart animate__animated animate__heartBeat animate__infinite"
-                style={{ color: "rgba(222, 56, 255, 0.233)" }}
-                aria-hidden="true"
-              />
-            </span>{" "}
-            by{" "}
-            <a href={footer.creditHref} target="_blank" rel="noopener noreferrer">
-              {footer.creditName}
-            </a>
-          </p>
-        </div>
+      <footer className="border-t border-white/10 px-4 py-8 text-center text-white/60">
+        <p className="text-[11px]">{footer.copyright}</p>
+        <p className="mt-1 text-sm">
+          {footer.creditPrefix}{" "}
+          <i
+            className="fas fa-heart animate-heartbeat text-funky-pink/70"
+            aria-hidden="true"
+          />{" "}
+          by{" "}
+          <a
+            href={footer.creditHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white/80 underline decoration-white/20 underline-offset-2 transition-colors hover:text-funky-pink"
+          >
+            {footer.creditName}
+          </a>
+        </p>
       </footer>
     </>
   );

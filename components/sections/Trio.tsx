@@ -1,56 +1,48 @@
+"use client";
+
 import type { TrioSection } from "@/lib/content";
 import { RichText } from "../RichText";
+import { useScrollReveal } from "@/lib/gsapScroll";
 
 /**
- * The three-across amenity cards. The vertical divider between them comes from
- * `.seperator`, which the last card opts out of via `.last`.
+ * Fixed accent per card position, cycling pink/cyan/yellow — full class
+ * strings written out literally so Tailwind's build-time scanner can see
+ * them (constructing them dynamically, e.g. `shadow-${color}/30`, wouldn't
+ * be detected and would silently produce no CSS).
  */
-export function Trio({ data }: { data: TrioSection }) {
-  return (
-    <section id={data.id} className="main container py-5">
-      <div className="row text-white text-center g-4">
-        {data.cards.map((card, index) => {
-          const isFirst = index === 0;
-          const isLast = index === data.cards.length - 1;
-          const classes = [
-            "card seperator h-100 bg-transparent border-0",
-            isLast ? "last" : "",
-            isFirst ? "" : "border-start ps-4",
-            isFirst || isLast ? "" : "border-light",
-          ]
-            .filter(Boolean)
-            .join(" ");
+const ACCENTS = [
+  { bar: "bg-funky-pink", glow: "hover:shadow-funky-pink/25" },
+  { bar: "bg-funky-cyan", glow: "hover:shadow-funky-cyan/25" },
+  { bar: "bg-funky-yellow", glow: "hover:shadow-funky-yellow/25" },
+];
 
+export function Trio({ data }: { data: TrioSection }) {
+  const ref = useScrollReveal<HTMLDivElement>(".reveal-item", { stagger: 0.15 });
+
+  return (
+    <section id={data.id} className="px-4 py-16 sm:py-24">
+      <div
+        ref={ref}
+        className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3"
+      >
+        {data.cards.map((card, index) => {
+          const accent = ACCENTS[index % ACCENTS.length];
           return (
-            <div key={card.id} className="col-lg-4 col-md-6 col-12">
-              <div className={classes}>
-                <div className="d-flex justify-content-center align-items-center">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={card.image.src}
-                    className="card-img-top rounded-4"
-                    style={{ objectFit: "cover", height: 250 }}
-                    alt={card.image.alt}
-                    data-aos="zoom-in-up"
-                  />
-                </div>
-                <div className="card-body d-flex flex-column align-items-center">
-                  <h1
-                    className="my-5 animated-header"
-                    data-aos="fade-down"
-                    data-aos-duration="850"
-                  >
-                    <RichText value={card.title} />
-                  </h1>
-                  <p
-                    className="card-text mt-3 animated-para"
-                    data-aos="fade-up"
-                    data-aos-duration="900"
-                  >
-                    {card.body}
-                  </p>
-                </div>
-              </div>
+            <div
+              key={card.id}
+              className={`reveal-item group flex flex-col items-center gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm transition-all duration-400 ease-out hover:-translate-y-2 hover:rotate-1 hover:border-white/25 hover:shadow-2xl ${accent.glow}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={card.image.src}
+                className="aspect-[4/3] w-full rounded-2xl object-cover shadow-lg shadow-black/30 transition-transform duration-500 group-hover:scale-105"
+                alt={card.image.alt}
+              />
+              <span className={`h-1.5 w-12 rounded-full ${accent.bar}`} aria-hidden="true" />
+              <h3 className="font-display text-xl font-semibold text-white">
+                <RichText value={card.title} />
+              </h3>
+              <p className="text-white/70 leading-relaxed">{card.body}</p>
             </div>
           );
         })}

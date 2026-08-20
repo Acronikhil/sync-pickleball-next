@@ -18,7 +18,7 @@ export function RichText({ value }: { value: string }) {
           {lineIndex > 0 && <br />}
           {tokens.map((token, tokenIndex) =>
             token.light ? (
-              <span key={tokenIndex} className="fw-light">
+              <span key={tokenIndex} className="font-light">
                 {token.text}
               </span>
             ) : (

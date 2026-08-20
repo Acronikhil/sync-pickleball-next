@@ -1,64 +1,51 @@
+"use client";
+
 import type { FeatureSection } from "@/lib/content";
 import { ActionButton } from "../ActionButton";
+import { useScrollReveal } from "@/lib/gsapScroll";
 
 /**
- * The wide "glow card" rows. `imageSide` flips the columns on desktop while
- * keeping the image first on mobile, matching the original ordering classes.
+ * The wide feature rows. `imageSide` flips the columns on desktop while the
+ * image always leads on mobile, matching the original ordering. The gradient
+ * "glow card" border is a real gradient background peeking through a 2px
+ * padding gap, not a border — CSS borders can't do multi-color gradients.
  */
 export function Feature({ data }: { data: FeatureSection }) {
   const imageFirst = data.imageSide === "left";
+  const ref = useScrollReveal<HTMLDivElement>(".reveal-item", { y: 50 });
 
   return (
-    <section
-      id={data.id}
-      className="main container rounded-5 d-flex justify-content-center align-items-center py-5 flex-column"
-    >
-      <div className="glow-card w-100 p-xl-5 rounded-5" style={{ maxWidth: 960 }}>
-        <div className="row g-4 m-xl-5">
+    <section id={data.id} className="px-4 py-16 sm:py-24">
+      <div
+        ref={ref}
+        className="mx-auto max-w-5xl rounded-[2.5rem] bg-[linear-gradient(120deg,var(--color-brand),var(--color-funky-pink),var(--color-funky-cyan))] bg-[length:200%_200%] p-[1.5px] transition-[background-position] duration-700 hover:bg-right"
+      >
+        <div className="flex flex-col items-center gap-8 rounded-[2.45rem] bg-[#1a1130]/80 p-6 backdrop-blur-sm sm:p-10 md:flex-row md:gap-10">
           <div
-            className={`col-md-5 ${
-              imageFirst ? "order-1" : "order-1 order-md-2"
+            className={`reveal-item order-1 w-full md:w-2/5 ${
+              imageFirst ? "md:order-1" : "md:order-2"
             }`}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={data.image.src}
-              className="img-fluid w-100 rounded-5"
-              style={{
-                objectFit: "cover",
-                maxHeight: 300,
-                aspectRatio: "4 / 3",
-              }}
+              className="aspect-[4/3] w-full rounded-[2rem] object-cover shadow-xl shadow-black/30 transition-transform duration-500 ease-out hover:scale-[1.03] hover:-rotate-1"
               alt={data.image.alt}
             />
           </div>
 
           <div
-            className={`col-md-7 d-flex align-items-center ${
-              imageFirst ? "order-2" : "order-2 order-md-1"
+            className={`reveal-item order-2 flex w-full flex-col items-center gap-4 text-center md:w-3/5 md:items-start md:text-left ${
+              imageFirst ? "md:order-2" : "md:order-1"
             }`}
           >
-            <div className="card-body d-flex align-items-center flex-column gap-3 h-100 px-4 text-md-start text-center w-100">
-              <h1 className="card-title" data-aos="fade-up">
-                {data.title}
-              </h1>
-              <p
-                className="card-text animated-card-text"
-                data-aos="flip-up"
-                data-aos-delay="100"
-                data-aos-duration="1250"
-              >
-                {data.body}
-              </p>
-              {data.buttons.map((button) => (
-                <ActionButton
-                  key={button.id}
-                  button={button}
-                  className="align-self-start d-inline-flex mx-md-0 mx-auto"
-                  style={{ width: "auto", color: "aliceblue" }}
-                />
-              ))}
-            </div>
+            <h2 className="font-display text-2xl font-semibold text-white sm:text-3xl">
+              {data.title}
+            </h2>
+            <p className="text-white/70 leading-relaxed">{data.body}</p>
+            {data.buttons.map((button) => (
+              <ActionButton key={button.id} button={button} />
+            ))}
           </div>
         </div>
       </div>

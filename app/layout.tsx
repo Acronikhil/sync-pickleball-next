@@ -43,14 +43,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Third-party CSS stays on CDNs, exactly as the original site loaded it,
-            so the visual result is unchanged. */}
+        {/*
+          UI_enhancement: the layout/animation frameworks (Bootstrap CSS,
+          animate.css) are gone — Tailwind (app/globals.css) and GSAP now do
+          that job. Icon glyph fonts stay, since components still reference
+          their classes (bi bi-*, fa fa-*) and swapping icon sets isn't part
+          of this pass. Fredoka is new: a rounder, punchier display face for
+          headings, layered onto the fonts the original site already loaded.
+        */}
         <link
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?display=swap&family=Montserrat:ital,wght@0,500;1,500&family=Inter:ital,wght@0,400;0,500;1,400;1,500&family=Open+Sans:ital,wght@0,400;1,400"
+          href="https://fonts.googleapis.com/css2?display=swap&family=Fredoka:wght@500;600;700&family=Montserrat:ital,wght@0,500;1,500&family=Inter:ital,wght@0,400;0,500;1,400;1,500&family=Open+Sans:ital,wght@0,400;1,400"
           rel="stylesheet"
         />
         <link
@@ -60,10 +62,6 @@ export default function RootLayout({
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
-        />
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
         />
         <script
           type="application/ld+json"

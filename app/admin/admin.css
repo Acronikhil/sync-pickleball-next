@@ -1,10 +1,12 @@
 /*
  * Admin panel styles.
  *
- * Everything here is prefixed `a-` and lives outside `.site-root`, so the
- * site's opinionated element rules (gradient-filled h1, 60vw paragraphs) never
- * reach the editor chrome. The preview pane is the one place `.site-root`
- * appears inside this page.
+ * Everything here is prefixed `a-` and lives outside `.site-root`. The public
+ * site's styling is Tailwind utility classes applied per-element in JSX (see
+ * app/globals.css), so there's no risk of a bare element-selector rule
+ * bleeding into this file the way there was with the old Bootstrap-era CSS —
+ * but Tailwind's own base reset still applies globally, so this file styles
+ * every element it uses explicitly rather than leaning on browser defaults.
  */
 
 .a-shell {
@@ -114,12 +116,11 @@
   border-bottom: 1px solid #2c2040;
 }
 
-/* Scroll reveal is disabled in the preview — otherwise unscrolled sections
-   would sit at opacity 0 and look broken while editing. */
-.a-preview-pane [data-aos] {
-  opacity: 1 !important;
-  transform: none !important;
-}
+/* Scroll-reveal animation inside the preview is skipped in JS (see
+   lib/gsapScroll.ts and components/sections/Hero.tsx — both check for a
+   `.a-preview-pane` ancestor) rather than here in CSS, since GSAP sets
+   opacity/transform via inline styles that a stylesheet rule can't safely
+   race against. */
 
 .a-mobile-toggle {
   display: none;
