@@ -47,11 +47,13 @@ site and deploys it. Changes are live in roughly 60–90 seconds.
 Because the pages are pre-rendered at build time, crawlers and social previews
 get complete HTML — nothing is fetched client-side, so SEO is unaffected.
 
-The only server-side piece is a small Cloudflare Worker. This is not a design
-preference: the final step of GitHub OAuth requires the client secret, and
-GitHub's token endpoint refuses cross-origin browser requests, so that one
-exchange cannot happen in a static page. The Worker does nothing else and
-stores nothing.
+Signing in is **Google**, not GitHub — but a Google identity carries no
+permission to write to this repo on its own. So there is one small server
+piece: a Cloudflare Worker that verifies the signed-in Google account, checks
+it against an allow-list, and only then commits on its behalf using a GitHub
+token that the Worker alone holds. Nothing else in the system can write to the
+repo. See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md#security-model) for the
+full security model.
 
 ---
 
@@ -60,8 +62,8 @@ stores nothing.
 Roughly 30 minutes end to end, most of it waiting for DNS and TLS. Do the steps
 in order — later ones depend on URLs produced by earlier ones.
 
-You need: push access to this repo, DNS control for `syncpickleball.com`, and a
-free Cloudflare account.
+You need: push access to this repo, DNS control for `syncpickleball.com`, a free
+Cloudflare account, and a Google account to sign in with.
 
 ### 1. Create the GitHub repo and push
 
@@ -76,8 +78,10 @@ git remote -v                 # should already show sync-pickleball-next
 git push -u origin main
 ```
 
-> Keep the repo **public**. GitHub Pages on a private repo requires a paid
-> plan, and the admin's `public_repo` OAuth scope cannot see private repos.
+> Keep the repo **public**. GitHub Pages on a private repo requires a paid plan.
+> (The admin panel's own reads are unauthenticated either way — see
+> [How it works](#how-it-works) — but a private repo needs Pages on a paid
+> plan regardless.)
 
 ### 2. Point DNS at GitHub Pages
 
@@ -111,39 +115,74 @@ finishes, tick **Enforce HTTPS**.
 > build copies into the output. **Don't delete that file** — without it, every
 > deploy would reset the domain.
 
-### 4. Create the GitHub OAuth App
+### 4. Create a Google OAuth client id
 
-<https://github.com/settings/developers> → **New OAuth App**
+<https://console.cloud.google.com/> → create a new project (any name, e.g.
+`Sync Pickleball Admin`).
+
+**APIs & Services → OAuth consent screen**
+
+- User type: **External**
+- App name / support email / developer email: fill in with your own details
+- Scopes: leave as default — "Sign in with Google" only needs the built-in
+  `openid`, `email` and `profile` scopes
+- **Test users:** add every Google account that should be able to publish
+  (e.g. your own Gmail). While the app is unpublished/"Testing" — which is
+  fine indefinitely for personal use — only accounts on this list can sign in,
+  and Google never requires app verification for it.
+
+**APIs & Services → Credentials → Create Credentials → OAuth client ID**
 
 | Field | Value |
 | --- | --- |
-| Application name | `Sync Pickleball Admin` |
-| Homepage URL | `https://cms.syncpickleball.com` |
-| Authorization callback URL | `https://cms.syncpickleball.com/admin/callback/` |
+| Application type | `Web application` |
+| Name | `Sync Pickleball Admin Web` |
+| Authorized JavaScript origins | `https://cms.syncpickleball.com` and `http://localhost:3000` |
+| Authorized redirect URIs | *(leave empty — Google Sign-In runs in-page, no redirect)* |
 
-The **trailing slash on the callback URL matters** — this site is built with
-`trailingSlash: true` and GitHub matches the string exactly.
+Copy the **Client ID** (ends in `.apps.googleusercontent.com`). There is no
+client secret to copy — this flow doesn't use one.
 
-Then **Generate a new client secret**. Copy the **Client ID** and the **secret**
-now; the secret is shown only once.
+### 5. Create a GitHub token and deploy the Worker
 
-### 5. Deploy the OAuth Worker
+The Worker needs a GitHub credential of its own to commit with, since a Google
+sign-in proves identity but grants no GitHub permission. Create one scoped to
+**only this repo**:
+
+<https://github.com/settings/personal-access-tokens/new> (fine-grained, not
+classic)
+
+| Field | Value |
+| --- | --- |
+| Token name | `sync-pickleball-next admin worker` |
+| Resource owner | your account |
+| Repository access | **Only select repositories** → `sync-pickleball-next` |
+| Permissions | **Contents: Read and write** |
+| Expiration | 1 year (fine-grained tokens can't be set to never expire — put a reminder in your calendar to rotate it; publishing will start failing with a clear 401 when it lapses) |
+
+Generate it and copy the token — shown once.
+
+Then deploy the Worker:
 
 ```bash
 cd oauth-worker
 ```
 
-Open [`wrangler.toml`](oauth-worker/wrangler.toml) and set `GITHUB_CLIENT_ID` to
-your client ID. `ALLOWED_ORIGINS` is already set to the `cms.` subdomain.
+Open [`wrangler.toml`](oauth-worker/wrangler.toml) and set `GOOGLE_CLIENT_ID`
+(from step 4) and `ADMIN_EMAILS` (the Google account(s) allowed to publish —
+must match what you added as test users). `ALLOWED_ORIGINS` and the repo
+details are already filled in.
 
 ```bash
 npx wrangler login
-npx wrangler secret put GITHUB_CLIENT_SECRET    # paste the secret
+npx wrangler secret put GITHUB_TOKEN    # paste the fine-grained token
 npx wrangler deploy
 ```
 
 Copy the URL it prints, e.g.
-`https://sync-pickleball-oauth.your-name.workers.dev`.
+`https://sync-pickleball-oauth.your-name.workers.dev` — that's the
+`PUBLISH_URL` value for the next step (the Worker's actual endpoint is
+`<that-url>/publish`; the app appends `/publish` itself).
 
 ### 6. Add the repository variables
 
@@ -152,14 +191,16 @@ repository variable*, four times:
 
 | Name | Value |
 | --- | --- |
-| `OAUTH_CLIENT_ID` | the OAuth App client ID from step 4 |
-| `OAUTH_PROXY_URL` | the Worker URL from step 5 |
-| `ADMIN_USERS` | `Acronikhil` (comma-separate to add more editors) |
+| `GOOGLE_CLIENT_ID` | the client ID from step 4 |
+| `PUBLISH_URL` | the Worker URL from step 5 |
+| `ADMIN_EMAILS` | your Gmail address (comma-separate to add more editors) |
 | `SITE_URL` | `https://cms.syncpickleball.com` |
 
-These are **variables, not secrets**. They are compiled into the public
-JavaScript bundle, which is correct — an OAuth client ID is public by design.
-**Never** put the client *secret* here; it belongs only in the Worker.
+These are **variables, not secrets** — they're compiled into the public
+JavaScript bundle, which is correct: a Google client ID is public by design,
+and `ADMIN_EMAILS` here is only a convenience check for the UI (the Worker
+holds its own copy and is what actually enforces it — see
+[the security model](docs/ARCHITECTURE.md#security-model)).
 
 `ALLOW_INDEXING` is deliberately left unset. See
 [search indexing](#search-indexing) below.
@@ -187,26 +228,29 @@ curl -s https://cms.syncpickleball.com | grep -c "Serve, Sip, and Socialize"   #
 # 3. Crawlers are turned away while this duplicates www
 curl -s https://cms.syncpickleball.com/robots.txt          # expect: Disallow: /
 
-# 4. Admin and its OAuth callback are reachable
+# 4. Admin is reachable
 curl -sI https://cms.syncpickleball.com/admin/ | head -1   # expect: HTTP/2 200
 
 # 5. The Worker rejects origins that aren't yours
-curl -s -X POST https://sync-pickleball-oauth.<your>.workers.dev \
+curl -s -X POST https://sync-pickleball-oauth.<your>.workers.dev/publish \
   -H "Origin: https://example.com" -H "Content-Type: application/json" \
-  -d '{"code":"test"}'                                     # expect: origin_not_allowed
+  -d '{"idToken":"x","files":[],"message":"test"}'          # expect: origin_not_allowed
 ```
 
 Then in a browser:
 
 1. Open `https://cms.syncpickleball.com` — it should be indistinguishable from
    the live site.
-2. Open `https://cms.syncpickleball.com/admin/` and **Sign in with GitHub**.
-   Authorise the app when prompted.
+2. Open `https://cms.syncpickleball.com/admin/` and click **Sign in with
+   Google**. Only accounts added as test users in step 4 will be offered
+   sign-in successfully.
 3. Change one word, watch the live preview update, and press **Publish**.
 4. Follow the Actions link in the status bar; when it goes green, hard-refresh
    the public page and confirm the change is there.
 
-If step 3 succeeds, the whole loop works.
+If step 3 succeeds, the whole loop works — Google verified who you are, the
+Worker checked you against its allow-list and committed on your behalf, and
+that commit triggered the rebuild.
 
 ### Search indexing
 
@@ -249,14 +293,22 @@ exactly the same way; the admin panel is a convenience, not a requirement.
 
 Two independent gates:
 
-1. `ADMIN_USERS` — a convenience check on the GitHub username.
-2. **GitHub itself** — the real boundary. The token is scoped to `public_repo`,
-   and GitHub rejects commits from any account without push access to this
-   repo. Someone who got past the first check still couldn't write anything.
+1. `ADMIN_EMAILS` in the app — a convenience check that produces a clear "no
+   access" message in the UI.
+2. **`ADMIN_EMAILS` in the Worker** — the real boundary. Every publish sends
+   the Worker a Google ID token; the Worker verifies its signature itself and
+   only commits if the verified email is on its own copy of the allow-list.
+   Someone who got past the first check still couldn't write anything, because
+   the Worker holds the only GitHub credential in the system.
 
-Access tokens are held in `sessionStorage` and vanish when the tab closes — a
-token that can write to your repo shouldn't sit on disk. Signing back in is one
-click.
+The two lists must be kept in sync by hand — update `ADMIN_EMAILS` in both the
+repository variables (step 6) and `oauth-worker/wrangler.toml` (step 5) — and
+also add new editors as Google Cloud test users (step 4), or they won't be able
+to sign in at all.
+
+The Google ID token is held in `sessionStorage` and vanishes when the tab
+closes; it also expires on its own after about an hour, at which point
+publishing will ask you to sign in again.
 
 ---
 
@@ -270,8 +322,9 @@ When you're ready for this to *be* `www.syncpickleball.com`:
    update [`public/CNAME`](public/CNAME) to match.
 3. Confirm DNS has `www` pointing at `acronikhil.github.io` (it likely already
    does).
-4. Update the OAuth App's Homepage and callback URLs to the new domain
-   (`https://www.syncpickleball.com/admin/callback/`).
+4. Add `https://www.syncpickleball.com` as an Authorized JavaScript origin on
+   the Google OAuth client (Google Cloud Console → Credentials → your client →
+   Authorized JavaScript origins).
 5. Add the new origin to `ALLOWED_ORIGINS` in
    [`oauth-worker/wrangler.toml`](oauth-worker/wrangler.toml) and
    `npx wrangler deploy`.
@@ -294,18 +347,16 @@ npm run build        # static export to ./out
 npm run typecheck
 ```
 
-To use the admin panel locally, register a **second** OAuth App with callback
-`http://localhost:3000/admin/callback/` (GitHub allows one callback URL per
-app), then create `.env.local`:
+To use the admin panel locally, `http://localhost:3000` is already an
+Authorized JavaScript origin on the Google OAuth client from step 4 and is
+already in the Worker's `ALLOWED_ORIGINS`. Create `.env.local`:
 
 ```
-NEXT_PUBLIC_GITHUB_CLIENT_ID=your_dev_client_id
-NEXT_PUBLIC_OAUTH_PROXY_URL=https://sync-pickleball-oauth.your-name.workers.dev
-NEXT_PUBLIC_ADMIN_USERS=Acronikhil
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
+NEXT_PUBLIC_PUBLISH_URL=https://sync-pickleball-oauth.your-name.workers.dev
+NEXT_PUBLIC_ADMIN_EMAILS=you@gmail.com
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
-
-`http://localhost:3000` is already in the Worker's allow-list.
 
 > Publishing from localhost commits to the **real** `main` branch — there is no
 > separate staging content. To experiment safely, set
@@ -321,10 +372,11 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 | `lib/content.ts` | The content schema — add a field here to make it editable |
 | `app/page.tsx`, `components/` | Renders that JSON into the page at build time |
 | `app/admin/` | The editor UI |
-| `lib/github.ts` | Single-commit writes via the GitHub Git Data API |
-| `lib/auth.ts` | Browser-side OAuth |
+| `lib/github.ts` | Unauthenticated reads of the public repo |
+| `lib/auth.ts` | Google Sign-In in the browser |
+| `lib/publish.ts` | Calls the Worker to commit changes |
 | `lib/image.ts` | Downscales uploads before they're committed |
-| `oauth-worker/` | Cloudflare Worker for the OAuth token exchange |
+| `oauth-worker/` | Verifies Google sign-in and commits via a GitHub token |
 | `.github/workflows/deploy.yml` | Builds to `./out`, deploys to Pages |
 | `public/booking/` | Earlier booking prototype, kept as-is |
 
@@ -349,30 +401,35 @@ It must contain exactly `cms.syncpickleball.com`.
 Usually DNS: confirm the `CNAME` record resolves and, on Cloudflare, that it is
 DNS-only rather than proxied.
 
-**"The editor is not connected to GitHub yet"** — `OAUTH_CLIENT_ID` or
-`OAUTH_PROXY_URL` is missing, or the workflow hasn't re-run since you added
-them. They're baked in at build time, so a rebuild is required.
+**"The editor is not connected to Google Sign-In yet"** — `GOOGLE_CLIENT_ID` or
+`PUBLISH_URL` is missing, or the workflow hasn't re-run since you added them.
+They're baked in at build time, so a rebuild is required.
 
-**`redirect_uri_mismatch` from GitHub** — the OAuth App's callback URL doesn't
-match exactly. It needs the trailing slash:
-`https://cms.syncpickleball.com/admin/callback/`.
+**Google's sign-in popup shows "access blocked" / account not offered** — the
+account isn't on the OAuth consent screen's **Test users** list (Google Cloud
+Console → APIs & Services → OAuth consent screen). Unpublished apps only allow
+sign-in for accounts explicitly listed there.
 
 **`origin_not_allowed` from the Worker** — the site's origin isn't in
-`ALLOWED_ORIGINS` in `wrangler.toml`. Update it and `npx wrangler deploy`.
+`ALLOWED_ORIGINS` in `wrangler.toml`, or isn't an Authorized JavaScript origin
+on the Google OAuth client. Update both and `npx wrangler deploy`.
 
-**"Login state did not match"** — login was started in a different tab, or the
-session expired. Start again from `/admin/`.
+**"No access" after signing in** — the email isn't in `ADMIN_EMAILS` in the
+app's repository variable. Check the Worker's own `ADMIN_EMAILS` in
+`wrangler.toml` too — that copy is what actually decides whether a publish
+succeeds.
 
-**"No access" after signing in** — the account isn't in `ADMIN_USERS`, or it
-genuinely lacks push access to this repo.
+**"Your sign-in expired"** — Google ID tokens last about an hour. Sign in
+again; there's nothing to configure here, it's expected behaviour.
 
 **Publish succeeds but the page looks unchanged** — check the Actions run
 first. Otherwise give it ~90 seconds and hard-refresh; Pages edge-caches
 aggressively.
 
-**Publish fails with 404 or 403** — the signed-in account lacks push access, or
-the OAuth scope is wrong for a private repo (`public_repo` cannot see private
-repos; use `repo`).
+**Publish fails with `publish_failed` / 502** — the Worker's `GITHUB_TOKEN`
+secret is missing, wrong, or has expired (fine-grained tokens max out at one
+year — see step 5). Generate a new one and
+`npx wrangler secret put GITHUB_TOKEN`.
 
 How it all fits together, and how to extend it:
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).

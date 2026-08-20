@@ -13,27 +13,23 @@ import {
   type SiteContent,
 } from "@/lib/content";
 import { siteContent as bundledContent } from "@/lib/site-content";
+import { actionsUrl, encodeBase64, getContentSha, loadContentFile } from "@/lib/github";
 import {
-  actionsUrl,
-  commitFiles,
-  encodeBase64,
-  getAuthenticatedUser,
-  getContentSha,
-  hasPushAccess,
-  loadContentFile,
-  type GitHubUser,
-  type PendingFile,
-} from "@/lib/github";
-import {
-  beginLogin,
   clearToken,
+  decodeIdentity,
+  disableAutoSelect,
   getToken,
-  isOAuthConfigured,
+  isExpired,
+  isGoogleConfigured,
+  setToken,
+  type Identity,
 } from "@/lib/auth";
+import { PublishError, publishContent, type PendingFile } from "@/lib/publish";
 import { formatBytes, prepareImage } from "@/lib/image";
 import { SiteRenderer } from "@/components/SiteRenderer";
 import { SectionEditor } from "@/components/admin/SectionEditor";
 import { UploadProvider } from "@/components/admin/UploadContext";
+import { GoogleSignInButton } from "@/components/admin/GoogleSignInButton";
 import {
   CheckboxField,
   ImageField,
@@ -80,7 +76,7 @@ function withPreviews(
 
 export default function AdminPage() {
   const [phase, setPhase] = useState<Phase>("loading");
-  const [user, setUser] = useState<GitHubUser | null>(null);
+  const [identity, setIdentity] = useState<Identity | null>(null);
   const [content, setContent] = useState<SiteContent>(bundledContent);
   const [baseline, setBaseline] = useState<string>("");
   const [baseSha, setBaseSha] = useState<string>("");
@@ -114,26 +110,33 @@ export default function AdminPage() {
       setPhase("anon");
       return;
     }
+
+    const account = decodeIdentity(token);
+    if (!account || isExpired(account)) {
+      clearToken();
+      setPhase("anon");
+      return;
+    }
+
     tokenRef.current = token;
+    setIdentity(account);
+
+    // A convenience check only — the Worker re-verifies this on every publish,
+    // and that check is the one that actually matters.
+    const allowed =
+      siteConfig.adminEmails.length === 0 ||
+      siteConfig.adminEmails.includes(account.email);
+
+    if (!allowed) {
+      setPhase("denied");
+      return;
+    }
 
     (async () => {
       try {
-        const account = await getAuthenticatedUser(token);
-        const allowed =
-          siteConfig.adminUsers.length === 0 ||
-          siteConfig.adminUsers.includes(account.login.toLowerCase());
-
-        if (!allowed || !(await hasPushAccess(token))) {
-          setUser(account);
-          setPhase("denied");
-          return;
-        }
-
-        setUser(account);
-
         // The repo is the source of truth — the bundled copy may be stale if
         // someone published from another device since this page was built.
-        const file = await loadContentFile(token);
+        const file = await loadContentFile();
         const remote = JSON.parse(file.text) as SiteContent;
         setBaseSha(file.sha);
         setBaseline(`${JSON.stringify(remote, null, 2)}\n`);
@@ -158,18 +161,22 @@ export default function AdminPage() {
 
         setPhase("ready");
       } catch (cause) {
-        clearToken();
-        tokenRef.current = null;
         setPhase("anon");
         setStatus({
           tone: "err",
           message:
             cause instanceof Error
-              ? `Could not sign in: ${cause.message}`
-              : "Could not sign in.",
+              ? `Could not load content: ${cause.message}`
+              : "Could not load content.",
         });
       }
     })();
+  }, []);
+
+  const handleToken = useCallback((idToken: string) => {
+    setToken(idToken);
+    // Simplest correct way to re-run the sign-in effect cleanly.
+    window.location.reload();
   }, []);
 
   /* --------------------------- draft handling --------------------------- */
@@ -264,65 +271,87 @@ export default function AdminPage() {
 
   async function publish() {
     const token = tokenRef.current;
-    if (!token) return;
+    if (!token || !identity) return;
+
+    if (isExpired(identity)) {
+      setStatus({
+        tone: "err",
+        message: "Your sign-in expired. Please sign in again.",
+      });
+      clearToken();
+      setPhase("anon");
+      return;
+    }
 
     setPublishing(true);
     setStatus({ tone: "idle", message: "Publishing…" });
 
+    const files: PendingFile[] = [
+      { path: siteConfig.contentPath, base64: encodeBase64(serialised) },
+      ...uploads.map((upload) => ({
+        path: upload.repoPath,
+        base64: upload.base64,
+      })),
+    ];
+    const imageNote =
+      uploads.length > 0
+        ? ` (+${uploads.length} image${uploads.length === 1 ? "" : "s"})`
+        : "";
+    const message = `Update site content via admin${imageNote}`;
+
     try {
-      // Someone may have published from another device since this page loaded.
-      const currentSha = await getContentSha(token);
-      if (currentSha !== baseSha) {
-        const overwrite = window.confirm(
-          "The live content changed since you opened this editor — someone may " +
-            "have published from another device.\n\nPublish anyway and overwrite " +
-            "their changes?"
-        );
-        if (!overwrite) {
-          setStatus({
-            tone: "err",
-            message: "Publish cancelled. Reload the page to get the latest content.",
+      let result;
+      try {
+        result = await publishContent({ idToken: token, files, message, baseSha });
+      } catch (cause) {
+        if (cause instanceof PublishError && cause.code === "conflict") {
+          const overwrite = window.confirm(
+            "The live content changed since you opened this editor — someone " +
+              "may have published from another device.\n\nPublish anyway and " +
+              "overwrite their changes?"
+          );
+          if (!overwrite) {
+            setStatus({
+              tone: "err",
+              message:
+                "Publish cancelled. Reload the page to get the latest content.",
+            });
+            return;
+          }
+          result = await publishContent({
+            idToken: token,
+            files,
+            message,
+            baseSha,
+            force: true,
           });
-          return;
+        } else {
+          throw cause;
         }
       }
 
-      const files: PendingFile[] = [
-        {
-          path: siteConfig.contentPath,
-          base64: encodeBase64(serialised),
-        },
-        ...uploads.map((upload) => ({
-          path: upload.repoPath,
-          base64: upload.base64,
-        })),
-      ];
-
-      const imageNote =
-        uploads.length > 0
-          ? ` (+${uploads.length} image${uploads.length === 1 ? "" : "s"})`
-          : "";
-      const sha = await commitFiles(
-        token,
-        files,
-        `Update site content via admin${imageNote}`
-      );
-
       setBaseline(serialised);
-      setBaseSha(await getContentSha(token));
+      setBaseSha(await getContentSha());
       setUploads([]);
       window.localStorage.removeItem(DRAFT_KEY);
       setStatus({
         tone: "ok",
-        message: `Published as ${sha.slice(0, 7)}. The site rebuilds in about a minute.`,
+        message: `Published as ${result.sha.slice(0, 7)}. The site rebuilds in about a minute.`,
       });
     } catch (cause) {
+      if (cause instanceof PublishError && cause.code === "unauthenticated") {
+        setStatus({
+          tone: "err",
+          message: "Your sign-in expired. Please sign in again.",
+        });
+        clearToken();
+        setTimeout(() => setPhase("anon"), 1200);
+        return;
+      }
       setStatus({
         tone: "err",
         message:
-          cause instanceof Error
-            ? `Publish failed: ${cause.message}`
-            : "Publish failed.",
+          cause instanceof Error ? `Publish failed: ${cause.message}` : "Publish failed.",
       });
     } finally {
       setPublishing(false);
@@ -339,6 +368,7 @@ export default function AdminPage() {
 
   function signOut() {
     clearToken();
+    disableAutoSelect();
     window.location.reload();
   }
 
@@ -355,7 +385,7 @@ export default function AdminPage() {
   }
 
   if (phase === "anon") {
-    return <LoginScreen status={status} />;
+    return <LoginScreen status={status} onToken={handleToken} />;
   }
 
   if (phase === "denied") {
@@ -364,8 +394,8 @@ export default function AdminPage() {
         <div className="a-login">
           <h1>No access</h1>
           <p>
-            You are signed in as <strong>{user?.login}</strong>, but that account
-            cannot push to {siteConfig.repo.owner}/{siteConfig.repo.name}.
+            You are signed in as <strong>{identity?.email}</strong>, but that
+            account is not on the list of editors for this site.
           </p>
           <button type="button" className="a-btn" onClick={signOut}>
             Sign out
@@ -427,11 +457,13 @@ export default function AdminPage() {
             {publishing ? "Publishing…" : "Publish"}
           </button>
 
-          {user && (
+          {identity && (
             <span className="a-user">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={user.avatar_url} alt="" />
-              {user.login}
+              {identity.picture && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={identity.picture} alt="" referrerPolicy="no-referrer" />
+              )}
+              {identity.name}
               <button
                 type="button"
                 className="a-icon-btn"
@@ -633,11 +665,14 @@ export default function AdminPage() {
 
 /* ------------------------------ login screen ------------------------------ */
 
-function LoginScreen({ status }: { status: Status }) {
-  const configured = isOAuthConfigured();
-  const [origin, setOrigin] = useState("");
-
-  useEffect(() => setOrigin(window.location.origin), []);
+function LoginScreen({
+  status,
+  onToken,
+}: {
+  status: Status;
+  onToken: (idToken: string) => void;
+}) {
+  const configured = isGoogleConfigured();
 
   return (
     <div className="a-shell">
@@ -648,41 +683,32 @@ function LoginScreen({ status }: { status: Status }) {
 
         {configured ? (
           <>
-            <p>
-              Sign in with the GitHub account that owns{" "}
-              {siteConfig.repo.owner}/{siteConfig.repo.name} to edit the site.
-            </p>
+            <p>Sign in with an authorised Google account to edit the site.</p>
             {status.message && (
               <p className={`a-status a-status-${status.tone}`}>
                 {status.message}
               </p>
             )}
-            <button
-              type="button"
-              className="a-btn a-btn-primary"
-              onClick={beginLogin}
-            >
-              Sign in with GitHub
-            </button>
+            <GoogleSignInButton onToken={onToken} />
           </>
         ) : (
           <>
-            <p>The editor is not connected to GitHub yet.</p>
+            <p>The editor is not connected to Google Sign-In yet.</p>
             <div className="a-setup">
               <strong>One-time setup</strong>
               <ol style={{ paddingLeft: "1.1rem", margin: "0.5rem 0 0" }}>
                 <li>
-                  Create a GitHub OAuth App with callback URL{" "}
-                  <code>{origin || siteConfig.site.url}/admin/callback/</code>
+                  Create a Google OAuth Web client id with this site as an
+                  authorised JavaScript origin
                 </li>
                 <li>
                   Deploy <code>oauth-worker/</code> to Cloudflare and set{" "}
-                  <code>GITHUB_CLIENT_SECRET</code>
+                  <code>GITHUB_TOKEN</code>
                 </li>
                 <li>
-                  Add <code>OAUTH_CLIENT_ID</code> and{" "}
-                  <code>OAUTH_PROXY_URL</code> as repository variables, then
-                  re-run the deploy workflow
+                  Add <code>GOOGLE_CLIENT_ID</code>, <code>PUBLISH_URL</code> and{" "}
+                  <code>ADMIN_EMAILS</code> as repository variables, then re-run
+                  the deploy workflow
                 </li>
               </ol>
               <p style={{ margin: "0.6rem 0 0" }}>

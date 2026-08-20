@@ -1,20 +1,48 @@
 /**
- * GitHub OAuth for a site with no backend.
+ * Google Sign-In for the admin panel.
  *
- * The browser can start the OAuth dance itself, but it cannot finish it:
- * GitHub's token endpoint requires the client secret and sends no CORS
- * headers. So the code-for-token swap goes through the Cloudflare Worker in
- * oauth-worker/, which is the only place the secret exists.
+ * Unlike the GitHub OAuth token this replaces, a Google ID token proves who
+ * you are but carries no permission to write to the repo — that stays with
+ * the Cloudflare Worker (see oauth-worker/), which holds a GitHub token and
+ * checks the signed-in email against an allow-list before it will commit
+ * anything on your behalf. See lib/publish.ts for that call.
  *
- * The token is held in sessionStorage, not localStorage — it disappears when
- * the tab closes, which keeps a repo-write token from sitting on disk
- * indefinitely. Re-login is one click once the OAuth app is authorised.
+ * The ID token is held in sessionStorage — gone when the tab closes — and it
+ * expires on its own after about an hour, at which point publishing will ask
+ * you to sign in again.
  */
 
 import { siteConfig } from "@/site.config";
 
-const TOKEN_KEY = "sync-admin-token";
-const STATE_KEY = "sync-admin-oauth-state";
+const TOKEN_KEY = "sync-admin-id-token";
+const GSI_SRC = "https://accounts.google.com/gsi/client";
+
+export interface Identity {
+  email: string;
+  name: string;
+  picture: string;
+  /** Unix seconds. */
+  exp: number;
+}
+
+interface GoogleCredentialResponse {
+  credential: string;
+}
+
+interface GoogleAccountsId {
+  initialize(config: {
+    client_id: string;
+    callback: (response: GoogleCredentialResponse) => void;
+  }): void;
+  renderButton(parent: HTMLElement, options: Record<string, unknown>): void;
+  disableAutoSelect(): void;
+}
+
+declare global {
+  interface Window {
+    google?: { accounts: { id: GoogleAccountsId } };
+  }
+}
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -29,65 +57,83 @@ export function clearToken(): void {
   window.sessionStorage.removeItem(TOKEN_KEY);
 }
 
-function redirectUri(): string {
-  return `${window.location.origin}/admin/callback/`;
-}
-
-/** True when the OAuth app details have been baked in at build time. */
-export function isOAuthConfigured(): boolean {
-  return Boolean(siteConfig.oauth.clientId && siteConfig.oauth.proxyUrl);
-}
-
-/** Sends the admin to GitHub to authorise. */
-export function beginLogin(): void {
-  const state = crypto.randomUUID();
-  window.sessionStorage.setItem(STATE_KEY, state);
-
-  const url = new URL("https://github.com/login/oauth/authorize");
-  url.searchParams.set("client_id", siteConfig.oauth.clientId);
-  url.searchParams.set("redirect_uri", redirectUri());
-  url.searchParams.set("scope", siteConfig.oauth.scope);
-  url.searchParams.set("state", state);
-
-  window.location.href = url.toString();
+/** True once the Google client id and Worker URL are baked in at build time. */
+export function isGoogleConfigured(): boolean {
+  return Boolean(siteConfig.google.clientId && siteConfig.publishUrl);
 }
 
 /**
- * Completes login on /admin/callback: verifies the state parameter, then has
- * the worker exchange the code for an access token.
+ * Reads the identity out of an ID token without verifying its signature —
+ * fine for display purposes only. Every publish is re-verified server-side by
+ * the Worker, so nothing here needs to be trusted.
  */
-export async function completeLogin(
-  code: string,
-  state: string
-): Promise<void> {
-  const expected = window.sessionStorage.getItem(STATE_KEY);
-  window.sessionStorage.removeItem(STATE_KEY);
-
-  if (!expected || expected !== state) {
-    throw new Error(
-      "Login state did not match. Start the login again from the admin page."
-    );
+export function decodeIdentity(idToken: string): Identity | null {
+  try {
+    const [, payloadB64] = idToken.split(".");
+    const padded = payloadB64.replace(/-/g, "+").replace(/_/g, "/");
+    const json = JSON.parse(atob(padded)) as Record<string, unknown>;
+    return {
+      email: String(json.email ?? "").toLowerCase(),
+      name: typeof json.name === "string" ? json.name : String(json.email ?? ""),
+      picture: typeof json.picture === "string" ? json.picture : "",
+      exp: typeof json.exp === "number" ? json.exp : 0,
+    };
+  } catch {
+    return null;
   }
+}
 
-  const response = await fetch(siteConfig.oauth.proxyUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ code }),
+export function isExpired(identity: Identity): boolean {
+  return identity.exp * 1000 < Date.now();
+}
+
+let scriptPromise: Promise<void> | null = null;
+
+function loadGsiScript(): Promise<void> {
+  scriptPromise ??= new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${GSI_SRC}"]`)) {
+      resolve();
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = GSI_SRC;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Could not load Google Sign-In."));
+    document.head.appendChild(script);
   });
+  return scriptPromise;
+}
 
-  const payload = (await response.json().catch(() => ({}))) as {
-    access_token?: string;
-    error?: string;
-    error_description?: string;
-  };
+/**
+ * Loads Google Identity Services and renders the official "Sign in with
+ * Google" button into `container`. `onToken` fires with the raw ID token once
+ * the admin signs in — this all happens in-page, with no redirect.
+ */
+export async function renderSignInButton(
+  container: HTMLElement,
+  onToken: (idToken: string) => void
+): Promise<void> {
+  await loadGsiScript();
 
-  if (!response.ok || !payload.access_token) {
-    throw new Error(
-      payload.error_description ??
-        payload.error ??
-        "Could not exchange the login code for a token."
-    );
-  }
+  const accounts = window.google?.accounts.id;
+  if (!accounts) throw new Error("Google Sign-In did not load.");
 
-  setToken(payload.access_token);
+  accounts.initialize({
+    client_id: siteConfig.google.clientId,
+    callback: (response) => onToken(response.credential),
+  });
+  accounts.renderButton(container, {
+    type: "standard",
+    theme: "filled_black",
+    size: "large",
+    text: "signin_with",
+    shape: "pill",
+  });
+}
+
+/** Stops Google from silently re-signing the admin back in on next visit. */
+export function disableAutoSelect(): void {
+  window.google?.accounts.id.disableAutoSelect();
 }

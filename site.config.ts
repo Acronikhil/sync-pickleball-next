@@ -3,9 +3,10 @@
  *
  * This is a statically exported site, so there is no server to read secrets at
  * runtime — everything here is baked into the JS bundle and is therefore
- * PUBLIC. That is fine for all of it: a GitHub OAuth *client id* is public by
- * design, and the client *secret* lives only in the Cloudflare Worker
- * (see oauth-worker/). Never put a token or secret in this file.
+ * PUBLIC. That is fine for all of it: a Google OAuth *client id* is public by
+ * design, and the GitHub token that can actually write to the repo lives only
+ * in the Cloudflare Worker (see oauth-worker/). Never put a token or secret in
+ * this file.
  *
  * Values come from NEXT_PUBLIC_* env vars set by .github/workflows/deploy.yml.
  */
@@ -41,30 +42,28 @@ export const siteConfig = {
   /** Directory (within the repo) that admin-uploaded images are committed to. */
   uploadsPath: "public/uploads",
 
-  oauth: {
-    /** GitHub OAuth App client id. Public by design. */
-    clientId: env.NEXT_PUBLIC_GITHUB_CLIENT_ID ?? "",
-    /**
-     * URL of the Cloudflare Worker that swaps an OAuth code for a token.
-     * GitHub's token endpoint sends no CORS headers and needs the client
-     * secret, so the browser cannot do this step itself.
-     */
-    proxyUrl: env.NEXT_PUBLIC_OAUTH_PROXY_URL ?? "",
-    /**
-     * "public_repo" is enough for a public repo. Switch to "repo" only if you
-     * make this repository private.
-     */
-    scope: env.NEXT_PUBLIC_OAUTH_SCOPE ?? "public_repo",
+  google: {
+    /** Google OAuth 2.0 Web client id. Public by design. */
+    clientId: env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "",
   },
 
   /**
-   * GitHub usernames allowed into the editor, comma-separated.
-   * This is a convenience gate, not the security boundary — the real control
-   * is GitHub itself, which rejects commits from anyone without push access.
+   * Base URL of the Cloudflare Worker that verifies the signed-in Google
+   * account and commits on its behalf (its endpoint is `${publishUrl}/publish`).
+   * This Worker is the only thing in the whole system that can write to the
+   * repo — see oauth-worker/.
    */
-  adminUsers: (env.NEXT_PUBLIC_ADMIN_USERS ?? "Acronikhil")
+  publishUrl: env.NEXT_PUBLIC_PUBLISH_URL ?? "",
+
+  /**
+   * Google accounts allowed into the editor, comma-separated, case-insensitive.
+   * This is a convenience gate for the UI only — the real control is the
+   * Worker, which holds its own copy of this list and re-checks the verified
+   * email server-side on every publish.
+   */
+  adminEmails: (env.NEXT_PUBLIC_ADMIN_EMAILS ?? "")
     .split(",")
-    .map((u) => u.trim().toLowerCase())
+    .map((e) => e.trim().toLowerCase())
     .filter(Boolean),
 
   /** Image uploads are downscaled in the browser before being committed. */

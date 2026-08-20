@@ -28,13 +28,18 @@ content that needs to be visible to search engines.
 
 ### The one piece that isn't static
 
-OAuth's final step exchanges a temporary code for an access token. It requires
-the client secret, and GitHub's token endpoint sends no CORS headers, so a
-browser cannot perform it — not "should not", *cannot*.
+Signing in is Google, not GitHub. A Google ID token proves who you are, but —
+unlike the GitHub OAuth token this design replaced — it carries no permission
+to write to this repo. Something has to hold a real GitHub credential and
+decide who's allowed to use it, and that can't be the browser: a token that
+could push to the repo would sit in view of anyone with devtools open.
 
-[`oauth-worker/`](../oauth-worker/) is a ~90-line Cloudflare Worker that does
-only that exchange. It holds the secret, checks the request origin against an
-allow-list, and returns the token. It stores nothing.
+[`oauth-worker/`](../oauth-worker/) is a small Cloudflare Worker that is the
+one thing in the whole system that can write to the repo. For every publish it
+verifies the caller's Google ID token itself (RS256 signature, issuer,
+audience, expiry — using only Google's public keys, via Web Crypto), checks
+the verified email against an allow-list, and only then commits using a GitHub
+token it alone holds. It stores nothing between requests.
 
 ---
 
@@ -52,29 +57,38 @@ scroll animations and the cursor effect.
 **An admin publishing:**
 
 ```
-/admin  ──▶ GitHub OAuth ──▶ /admin/callback ──▶ Worker ──▶ access token
+/admin  ──▶ Google Sign-In (in-page, no redirect) ──▶ ID token in the browser
                                                               │
-   edit ──▶ Publish ──▶ Git Data API (blobs → tree → commit → ref)
+   edit ──▶ Publish ──▶ Worker: verify ID token, check allow-list
+                            │
+                            └─▶ Git Data API (blobs → tree → commit → ref)
                                                               │
                                           push to main ──▶ Actions ──▶ Pages
 ```
 
-Publishing uses the **Git Data API** rather than the simpler Contents API
+Everything below "Publish" happens inside the Worker — the browser never talks
+to GitHub for writes at all, only for the initial unauthenticated read of
+`site.json` (see [`lib/github.ts`](../lib/github.ts)).
+
+The Worker uses the **Git Data API** rather than the simpler Contents API
 because a session may change `site.json` *and* add several images. The Contents
 API writes one file per commit, which would mean one Actions run and one deploy
 per file. The Git Data API builds a single tree and a single commit, so an
-editing session produces exactly one deploy.
-
-See [`lib/github.ts`](../lib/github.ts).
+editing session produces exactly one deploy. See
+[`oauth-worker/worker.js`](../oauth-worker/worker.js).
 
 ### Concurrent edits
 
-Before committing, the admin re-reads the blob SHA of `site.json` and compares
-it to the SHA read when the editor loaded. If they differ, someone published
-from elsewhere in the meantime and the admin is asked whether to overwrite.
+The browser sends the blob SHA of `site.json` it started from along with every
+publish. The Worker compares that against the file's current SHA *before*
+committing; if they differ, someone published from elsewhere in the meantime,
+and it refuses with a 409 unless the request says to force it. The admin UI
+catches that and asks whether to overwrite.
 
-This is a warning, not a lock. Two people editing simultaneously is out of scope
-for a single-admin site.
+Checking this inside the Worker (rather than racily in the browser, as an
+earlier version of this design did) closes the gap between "check" and
+"commit" — though it's still a warning, not a lock. Two people editing
+simultaneously is out of scope for a single-admin site.
 
 ---
 
@@ -211,29 +225,59 @@ rather than an approximation of them.
 
 ## Security model
 
-**Authentication** is GitHub OAuth. **Authorisation** is GitHub itself: the
-token carries the `public_repo` scope, and GitHub rejects writes from any account
-without push access. The `ADMIN_USERS` list is a convenience check that produces
-a clear "no access" message — it is not the boundary, and it is not relied upon.
+**Authentication** is Google Sign-In: the browser gets an ID token proving
+which Google account signed in. That's identity only — it grants nothing by
+itself.
 
-**Tokens** live in `sessionStorage`, so they are gone when the tab closes. A
-token that can write to the repo shouldn't persist on disk.
+**Authorisation** happens entirely inside the Worker, on every single publish:
 
-**The client secret** exists only as a Cloudflare Worker secret. Everything
-compiled into the site bundle — client ID, proxy URL, repo name, admin list — is
-public by design.
+1. Verify the ID token's RS256 signature against Google's public keys — proves
+   Google actually issued it.
+2. Check `aud` matches this app's client id — proves it was issued *for this
+   app*, not some other site using the same Google account.
+3. Check `iss` and `exp` — proves it's really from Google and hasn't expired.
+4. Check `email_verified` — proves the address isn't spoofable.
+5. Check the verified email against the Worker's own `ADMIN_EMAILS` — proves
+   this specific person is allowed to publish.
 
-**The Worker's origin allow-list** stops another site from using your proxy to
-mint tokens against your OAuth app.
+Only after all five pass does the Worker touch GitHub. The `adminEmails` list
+compiled into the site bundle is a separate, client-side copy used only to show
+a clear "no access" message before an admin even tries — it is not trusted for
+anything, and the Worker never reads it.
+
+**The GitHub token** is a fine-grained personal access token, scoped to
+*Contents: Read and write* on *only this repository*. It exists solely as a
+Cloudflare Worker secret and is never sent to the browser, so there is no
+version of "view source" or "check devtools" that exposes it. Compare this to
+the GitHub-OAuth design it replaced, where each admin's own token — scoped by
+their personal GitHub permissions — briefly lived in their browser; here, one
+narrowly-scoped token lives permanently in the Worker instead, so the token's
+own scope (this repo, contents only) is what limits the blast radius of a
+compromise, not who's holding it at the time.
+
+**ID tokens** live in `sessionStorage` and are gone when the tab closes; they
+also expire on their own after about an hour regardless.
+
+**The Worker's origin allow-list** (`ALLOWED_ORIGINS`) stops another site from
+using your Worker to publish, even with a legitimately verified Google token —
+CORS is checked before anything else.
 
 **Admin-authored content** is rendered as React nodes, never as raw HTML, so a
 careless or compromised admin cannot inject script into the public page.
 
 ### What this does not defend against
 
-An attacker who compromises the admin's GitHub account can change the site — but
-they could do that by pushing to the repo anyway; the admin panel adds no new
-exposure. Enable 2FA on the GitHub account; that is the meaningful control.
+Anyone who can add themselves to *both* allow-lists (`ADMIN_EMAILS` in the repo
+variables and in `oauth-worker/wrangler.toml`) can publish — but reaching that
+point already means they have push access to this repo or admin access to the
+Cloudflare account, at which point they could change the site directly anyway.
+Enable 2FA on both the GitHub and Cloudflare accounts; that's the meaningful
+control.
+
+If the GitHub token ever leaks, rotate it immediately: generate a new
+fine-grained PAT, `npx wrangler secret put GITHUB_TOKEN`, and revoke the old
+one from GitHub's token settings. Its scope (one repo, contents only) limits
+what a leak could do, but revoking is still the right first move.
 
 ---
 
