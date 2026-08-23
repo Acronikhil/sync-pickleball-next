@@ -4,7 +4,7 @@
     "id": "hero",
     "type": "hero",
     "logo": {
-      "src": "/assets/logo.png",
+      "src": "/uploads/asset-6-1787509804506.jpg",
       "alt": "Sync logo"
     },
     "heading": "SERVE. RALLY. SYNC.",
@@ -33,7 +33,7 @@
       "id": "feature-cafe",
       "type": "feature",
       "image": {
-        "src": "/assets/images/image01.jpg",
+        "src": "/uploads/1787509598834-1787509852436.jpg",
         "alt": "Café seating at Sync Pickleball"
       },
       "imageSide": "left",
