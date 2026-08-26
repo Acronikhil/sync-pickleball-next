@@ -4,7 +4,7 @@
     "id": "hero",
     "type": "hero",
     "logo": {
-      "src": "/uploads/hero-image-1787728916364.jpg",
+      "src": "/uploads/hero_image.png",
       "alt": "Sync logo"
     },
     "heading": "SERVE. RALLY. SYNC.",
