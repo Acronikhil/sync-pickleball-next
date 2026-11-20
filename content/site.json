@@ -245,5 +245,8 @@
   "cursor": {
     "enabled": true,
     "image": "/assets/images/pickleball.png"
+  },
+  "snow": {
+    "enabled": true
   }
 }

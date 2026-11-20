@@ -36,6 +36,7 @@ function navLinks(sections: BodySection[]): NavLink[] {
  */
 export function SiteRenderer({ content }: { content: SiteContent }) {
   const { hero, sections } = content;
+  const snowy = content.snow?.enabled ?? false;
   const book = hero.buttons.find((b) => b.emphasis === "primary");
   const marqueeWords = hero.heading
     .split(/\s+/)
@@ -60,7 +61,7 @@ export function SiteRenderer({ content }: { content: SiteContent }) {
       case "gallery":
         return <Gallery key={section.id} data={section} />;
       case "cta":
-        return <Cta key={section.id} data={section} photos={ctaPhotos} />;
+        return <Cta key={section.id} data={section} photos={ctaPhotos} snowy={snowy} />;
       default:
         return null;
     }
@@ -72,10 +73,10 @@ export function SiteRenderer({ content }: { content: SiteContent }) {
       <main>
         <Hero data={hero} />
         <Marquee words={marqueeWords} />
-        <ShotPicker shots={shots} />
+        <ShotPicker shots={shots} snowy={snowy} />
         {sections.map(renderSection)}
       </main>
-      <SiteFooter socials={content.socials} footer={content.footer} logo={hero.logo} />
+      <SiteFooter socials={content.socials} footer={content.footer} logo={hero.logo} snowy={snowy} />
     </div>
   );
 }

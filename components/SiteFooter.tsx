@@ -2,6 +2,7 @@ import type { FooterContent, ImageRef, SocialLink } from "@/lib/content";
 import { FlowText } from "./FlowText";
 import { Icon } from "./Icon";
 import { Penguin } from "./Penguin";
+import { SnowCap } from "./SnowCap";
 
 /**
  * What to print for a contact link. The content only stores the href and an
@@ -30,10 +31,12 @@ export function SiteFooter({
   socials,
   footer,
   logo,
+  snowy = false,
 }: {
   socials: SocialLink[];
   footer: FooterContent;
   logo: ImageRef;
+  snowy?: boolean;
 }) {
   return (
     <footer id="visit" className="scroll-mt-24 overflow-hidden px-4 pt-16 sm:px-6">
@@ -95,6 +98,10 @@ export function SiteFooter({
         {/* The penguin, perched on the "c": the top of the lowercase letters
             sits ~31% down the wordmark at every width, as it scales as one. */}
         <Penguin pose="idle" className="absolute right-[7%] top-[31%] w-[13%] -translate-y-[93%]" />
+        {snowy && (
+          // A little mound on top of the "c", in front of the penguin's feet.
+          <SnowCap seed={5} shape="mound" className="absolute right-[4.5%] top-[31%] h-[7%] w-[18%] -translate-y-[78%]" />
+        )}
       </div>
     </footer>
   );

@@ -628,7 +628,7 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <h2 className="a-section-title">Cursor effect</h2>
+            <h2 className="a-section-title">Effects</h2>
             <div className="a-card">
               <div className="a-card-body">
                 <CheckboxField
@@ -637,6 +637,15 @@ export default function AdminPage() {
                   onChange={(enabled) =>
                     mutate((draft) => {
                       draft.cursor.enabled = enabled;
+                    })
+                  }
+                />
+                <CheckboxField
+                  label="Winter mode: falling snow and snowy edges"
+                  checked={content.snow?.enabled ?? false}
+                  onChange={(enabled) =>
+                    mutate((draft) => {
+                      draft.snow = { enabled };
                     })
                   }
                 />

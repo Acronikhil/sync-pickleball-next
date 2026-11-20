@@ -133,6 +133,13 @@ export interface SiteContent {
     /** Left over from the old pickleball cursor; no longer rendered. */
     image: string;
   };
+  /**
+   * Winter dress: falling snow plus drifts on cards and under the penguins.
+   * Optional because content saved before it existed doesn't have it (off).
+   */
+  snow?: {
+    enabled: boolean;
+  };
 }
 
 /* ------------------------------------------------------------------ *

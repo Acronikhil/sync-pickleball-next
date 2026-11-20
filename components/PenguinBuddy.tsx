@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { Button } from "@/lib/content";
 import { Icon } from "./Icon";
 import { Penguin } from "./Penguin";
+import { SnowCap } from "./SnowCap";
 
 const DISMISS_KEY = "sync-penguin-dismissed";
 
@@ -16,7 +17,7 @@ const DISMISS_KEY = "sync-penguin-dismissed";
  * Public page only: mounted from app/page.tsx, never in the admin preview,
  * where a fixed element would float over the editor.
  */
-export function PenguinBuddy({ book }: { book?: Button }) {
+export function PenguinBuddy({ book, snowy = false }: { book?: Button; snowy?: boolean }) {
   const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
   const [dismissed, setDismissed] = useState(true);
@@ -112,8 +113,9 @@ export function PenguinBuddy({ book }: { book?: Button }) {
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-label={open ? "Close the penguin's message" : "Ask the Sync penguin"}
-        className="group -mb-3 w-20 shrink-0 cursor-pointer border-0 bg-transparent p-0 md:w-24"
+        className="group relative -mb-3 w-20 shrink-0 cursor-pointer border-0 bg-transparent p-0 md:w-24"
       >
+        {snowy && <SnowCap seed={9} shape="mound" className="absolute -inset-x-4 bottom-0 z-10 h-7" />}
         <Penguin
           pose={open ? "cheer" : "wave"}
           className="w-full drop-shadow-[0_10px_20px_rgb(13_8_32/0.6)] transition-transform duration-300 group-hover:-translate-y-1"

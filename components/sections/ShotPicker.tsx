@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { Penguin } from "../Penguin";
+import { SnowCap } from "../SnowCap";
 
 export interface Shot {
   label: string;
@@ -33,13 +34,26 @@ const GRAVITY = 0.55;
 const HIT_SPEED = 9;
 
 /**
+ * Resting spot for ball `i` of `n`, as fractions of the court. Wide courts
+ * get one staggered row; narrow ones (phones) a grid of two rows, so the
+ * labels have room and don't run off the edges.
+ */
+function homeFor(i: number, n: number, width: number): [number, number] {
+  if (width < 640) {
+    const cols = Math.ceil(n / 2);
+    return [((i % cols) + 0.5) / cols, i < cols ? 0.3 : 0.68];
+  }
+  return [(i + 0.5) / n, i % 2 === 0 ? 0.42 : 0.66];
+}
+
+/**
  * "Pick your shot": a little court where the cursor is a paddle and each
  * ball is a destination. Swing through a ball and it flies off; once it's
  * gone the page heads to wherever that ball was labelled. A slow touch just
  * nudges it. Clicking, tapping or pressing Enter on a ball launches it too,
  * so it works on touch screens and from the keyboard.
  */
-export function ShotPicker({ shots }: { shots: Shot[] }) {
+export function ShotPicker({ shots, snowy = false }: { shots: Shot[]; snowy?: boolean }) {
   const courtRef = useRef<HTMLDivElement>(null);
   const paddleRef = useRef<HTMLDivElement>(null);
   const toastRef = useRef<HTMLParagraphElement>(null);
@@ -59,8 +73,7 @@ export function ShotPicker({ shots }: { shots: Shot[] }) {
     const els = Array.from(court.querySelectorAll<HTMLButtonElement>("[data-ball]"));
     const balls: Ball[] = els.map((el, i) => {
       // Two staggered rows read more like balls scattered on a court.
-      const homeX = (i + 0.5) / els.length;
-      const homeY = i % 2 === 0 ? 0.42 : 0.66;
+      const [homeX, homeY] = homeFor(i, els.length, width);
       return {
         el,
         shot: shots[i],
@@ -254,6 +267,9 @@ export function ShotPicker({ shots }: { shots: Shot[] }) {
     const resize = new ResizeObserver(() => {
       width = court.clientWidth;
       height = court.clientHeight;
+      balls.forEach((ball, i) => {
+        [ball.homeX, ball.homeY] = homeFor(i, balls.length, width);
+      });
       for (const ball of balls) {
         if (!ball.flying) {
           ball.x = ball.homeX * width;
@@ -303,6 +319,9 @@ export function ShotPicker({ shots }: { shots: Shot[] }) {
           aria-live="polite"
           className="pointer-events-none absolute -top-16 right-36 z-30 origin-bottom-right scale-90 rounded-2xl rounded-br-sm bg-cream px-4 py-2 font-display text-sm font-bold text-night opacity-0 shadow-xl shadow-night/40 transition-all duration-300 data-[show=true]:scale-100 data-[show=true]:opacity-100 md:right-44"
         />
+
+        {/* Snow along the baseline, which the umpire stands knee-deep in. */}
+        {snowy && <SnowCap seed={7} className="pointer-events-none absolute inset-x-5 -top-3 z-[2] h-7 md:h-8" />}
 
         <div
           ref={courtRef}

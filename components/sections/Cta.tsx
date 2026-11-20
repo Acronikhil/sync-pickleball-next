@@ -2,20 +2,31 @@ import type { CtaSection, ImageRef } from "@/lib/content";
 import { ActionButton } from "../ActionButton";
 import { Icon } from "../Icon";
 import { RichText } from "../RichText";
+import { SnowCap } from "../SnowCap";
 
 /**
  * The closing "book now" panel: a court-purple slab with faint court lines,
  * floating sparkles from the logo and, on wide screens, a couple of tilted
  * venue snapshots pinned to its corners.
  */
-export function Cta({ data, photos = [] }: { data: CtaSection; photos?: ImageRef[] }) {
+export function Cta({
+  data,
+  photos = [],
+  snowy = false,
+}: {
+  data: CtaSection;
+  photos?: ImageRef[];
+  snowy?: boolean;
+}) {
   const [left, right] = photos;
 
   return (
     <section id={data.id} className="scroll-mt-24 px-4 py-20 sm:px-6 md:py-28">
+      {/* The drift sits outside the panel, which clips its own contents. */}
+      <div data-reveal className="relative mx-auto max-w-6xl">
+      {snowy && <SnowCap seed={3} className="absolute inset-x-6 -top-3.5 z-10 h-7 md:inset-x-10 md:h-9" />}
       <div
-        data-reveal
-        className="relative isolate mx-auto max-w-6xl overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-court via-[#5537a8] to-plum px-6 py-20 text-center md:px-16 md:py-28"
+        className="relative isolate overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-court via-[#5537a8] to-plum px-6 py-20 text-center md:px-16 md:py-28"
       >
         <div className="court-lines absolute inset-0 -z-10 opacity-70 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
         <div className="absolute -right-20 -top-20 -z-10 size-80 rounded-full bg-lilac/30 blur-3xl" />
@@ -55,6 +66,7 @@ export function Cta({ data, photos = [] }: { data: CtaSection; photos?: ImageRef
             ))}
           </div>
         )}
+      </div>
       </div>
     </section>
   );
