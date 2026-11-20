@@ -6,6 +6,9 @@ import type { NextConfig } from "next";
  * - `images.unoptimized` is required: the Next image optimizer needs a server.
  */
 const nextConfig: NextConfig = {
+  // Overridable so a test build (NEXT_DIST_DIR=.next-build npm run build)
+  // doesn't overwrite the files a running `next dev` is serving from .next.
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   output: "export",
   trailingSlash: true,
   images: { unoptimized: true },
