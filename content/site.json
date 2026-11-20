@@ -8,7 +8,7 @@
       "alt": "Sync logo"
     },
     "background": {
-      "src": "/assets/venue/courts-night.jpg",
+      "src": "/assets/venue/courts-night.webp",
       "alt": "Sync Pickleball courts lit up at night with the café behind"
     },
     "heading": "SERVE. RALLY. SYNC.",
@@ -37,7 +37,7 @@
       "id": "feature-cafe",
       "type": "feature",
       "image": {
-        "src": "/assets/venue/cafe-murals.jpg",
+        "src": "/assets/venue/cafe-murals.webp",
         "alt": "Open-air café seating beside the Sync mural wall"
       },
       "imageSide": "left",
@@ -58,7 +58,7 @@
       "id": "feature-courts",
       "type": "feature",
       "image": {
-        "src": "/assets/venue/court-covered.jpg",
+        "src": "/assets/venue/court-covered.webp",
         "alt": "Covered purple pickleball court with the Sync logo"
       },
       "imageSide": "right",
@@ -91,7 +91,7 @@
         {
           "id": "card-indoor",
           "image": {
-            "src": "/assets/venue/court-logo.jpg",
+            "src": "/assets/venue/court-logo.webp",
             "alt": "Sync logo painted on the court under a covered roof"
           },
           "title": "Indoor _Comfort,_\n_Outdoor Feels_",
@@ -100,7 +100,7 @@
         {
           "id": "card-hangout",
           "image": {
-            "src": "/assets/venue/penguin-night.jpg",
+            "src": "/assets/venue/penguin-night.webp",
             "alt": "Penguin mascot and string-lit hangout area at night"
           },
           "title": "Pull Up,\n_Hang Out_",
@@ -117,7 +117,7 @@
         {
           "id": "photo-signage",
           "image": {
-            "src": "/assets/venue/signage.jpg",
+            "src": "/assets/venue/signage.webp",
             "alt": "Sync Pickleball Club & Café signage"
           },
           "caption": "Pickleball Club & Café"
@@ -125,7 +125,7 @@
         {
           "id": "photo-night",
           "image": {
-            "src": "/assets/venue/courts-night.jpg",
+            "src": "/assets/venue/courts-night.webp",
             "alt": "Purple courts at night with the café behind"
           },
           "caption": "Night sessions under the lights"
@@ -133,7 +133,7 @@
         {
           "id": "photo-penguin",
           "image": {
-            "src": "/assets/venue/penguin-night.jpg",
+            "src": "/assets/venue/penguin-night.webp",
             "alt": "Penguin mascot beside the string-lit walkway"
           },
           "caption": "Say hi to our penguin"
@@ -141,7 +141,7 @@
         {
           "id": "photo-logo",
           "image": {
-            "src": "/assets/venue/court-logo.jpg",
+            "src": "/assets/venue/court-logo.webp",
             "alt": "Sync logo painted on the court"
           },
           "caption": "Our home court"
@@ -149,7 +149,7 @@
         {
           "id": "photo-cafe",
           "image": {
-            "src": "/assets/venue/cafe-murals.jpg",
+            "src": "/assets/venue/cafe-murals.webp",
             "alt": "Café tables beside the colourful mural wall"
           },
           "caption": "Café by the murals"
@@ -157,7 +157,7 @@
         {
           "id": "photo-welcome",
           "image": {
-            "src": "/assets/venue/welcome.jpg",
+            "src": "/assets/venue/welcome.webp",
             "alt": "Welcome board at the club entrance"
           },
           "caption": "Welcome in"
@@ -165,7 +165,7 @@
         {
           "id": "photo-covered",
           "image": {
-            "src": "/assets/venue/court-covered.jpg",
+            "src": "/assets/venue/court-covered.webp",
             "alt": "Covered court with an open-air feel"
           },
           "caption": "Covered courts, open air"
@@ -176,7 +176,7 @@
       "id": "feature-community",
       "type": "feature",
       "image": {
-        "src": "/assets/venue/welcome.jpg",
+        "src": "/assets/venue/welcome.webp",
         "alt": "Welcome board at the entrance of Sync Pickleball Club and Café"
       },
       "imageSide": "left",

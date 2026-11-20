@@ -58,7 +58,17 @@ export function FestiveParticles({ kind, icon }: { kind: Kind; icon: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [on, setOn] = useState(false);
   const [allowed, setAllowed] = useState(false);
+  // The toggle waits until the header is scrolled past, so it never sits on
+  // top of the hero's buttons on a phone.
+  const [showToggle, setShowToggle] = useState(false);
   const prefKey = `sync-particles-${kind}`;
+
+  useEffect(() => {
+    const onScroll = () => setShowToggle(window.scrollY > window.innerHeight * 0.6);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -234,7 +244,8 @@ export function FestiveParticles({ kind, icon }: { kind: Kind; icon: string }) {
         title={on ? `Turn ${noun} off` : `Turn ${noun} on`}
         className={`fixed bottom-4 left-4 z-45 grid size-11 cursor-pointer place-items-center rounded-full border border-white/15 p-0 text-lg backdrop-blur-md transition-all md:bottom-6 md:left-6 ${
           on ? "bg-white/15 text-cream" : "bg-night/60 text-cream/50 grayscale"
-        }`}
+        } ${showToggle ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"}`}
+        tabIndex={showToggle ? 0 : -1}
       >
         <span aria-hidden="true">{icon}</span>
       </button>

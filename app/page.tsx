@@ -1,3 +1,4 @@
+import { preload } from "react-dom";
 import { SiteRenderer } from "@/components/SiteRenderer";
 import { CustomCursor } from "@/components/CustomCursor";
 import { Motion } from "@/components/Motion";
@@ -17,6 +18,10 @@ import { activeTheme } from "@/lib/themes";
  */
 export default function HomePage() {
   const book = siteContent.hero.buttons.find((b) => b.emphasis === "primary");
+  // The header photo is the largest thing on screen; fetch it first.
+  if (siteContent.hero.background?.src) {
+    preload(siteContent.hero.background.src, { as: "image", fetchPriority: "high" });
+  }
   const { spec: theme } = activeTheme(siteContent);
 
   return (

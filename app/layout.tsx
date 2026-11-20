@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Inter, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/site.config";
+import { siteContent } from "@/lib/site-content";
 
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -49,6 +50,11 @@ export const metadata: Metadata = {
       "Pro-grade courts, a cutesy café and a buzzing community. Book your slot today!",
     images: ["/assets/venue/courts-night.jpg"],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sync Pickleball – Club & Café, Indore",
+    images: ["/assets/venue/courts-night.jpg"],
+  },
 };
 
 export const viewport: Viewport = {
@@ -57,13 +63,41 @@ export const viewport: Viewport = {
   themeColor: "#0d0820",
 };
 
-const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "SportsActivityLocation",
-  name: "Sync Pickleball",
-  url: `${siteConfig.site.url}/`,
-  logo: `${siteConfig.site.url}/assets/logo.png`,
-};
+/**
+ * Business details for search engines (rich results, Maps panel). Contact
+ * fields come from the footer's contact links, so editing those in /admin
+ * keeps this in step.
+ */
+function organizationSchema() {
+  const href = (icon: string) =>
+    siteContent.socials.find((s) => s.icon === icon)?.href ?? "";
+  const phone = href("phone").replace(/^tel:/, "");
+  const email = href("envelope").replace(/^mailto:/, "");
+  const instagram = href("instagram").split("?")[0];
+  const map = href("location");
+  const photo = siteContent.hero.background?.src;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "SportsActivityLocation",
+    name: "Sync Pickleball Club & Café",
+    description: siteContent.hero.body,
+    url: `${siteConfig.site.url}/`,
+    logo: `${siteConfig.site.url}/assets/logo.png`,
+    ...(photo ? { image: `${siteConfig.site.url}${photo}` } : {}),
+    ...(phone ? { telephone: phone } : {}),
+    ...(email ? { email } : {}),
+    ...(map ? { hasMap: map } : {}),
+    ...(instagram ? { sameAs: [instagram] } : {}),
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Indore",
+      addressRegion: "Madhya Pradesh",
+      addressCountry: "IN",
+    },
+    sport: "Pickleball",
+  };
+}
 
 /** Runs before paint so scroll-reveal elements never flash. See globals.css. */
 const motionFlag = `if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("js")`;
@@ -82,7 +116,7 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(organizationSchema),
+            __html: JSON.stringify(organizationSchema()),
           }}
         />
       </head>

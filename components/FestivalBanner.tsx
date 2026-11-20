@@ -21,7 +21,7 @@ export function FestivalBanner({
     <div
       role="region"
       aria-label="Announcement"
-      className="relative z-[55] px-4 py-2.5 text-center text-sm font-medium text-white"
+      className="relative z-55 px-4 py-0.5 text-center text-xs font-medium leading-snug text-white sm:text-sm"
       style={{ background: theme.banner }}
     >
       <span className="mr-2">{message}</span>
@@ -29,7 +29,7 @@ export function FestivalBanner({
         <a
           href={book.href}
           {...(book.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-          className="inline-flex items-center gap-1 whitespace-nowrap font-semibold underline decoration-white/50 underline-offset-4 hover:decoration-white"
+          className="inline-flex min-h-10 items-center gap-1 whitespace-nowrap font-semibold underline decoration-white/50 underline-offset-4 hover:decoration-white"
         >
           {book.label}
           <Icon name="arrow-right" className="size-3.5" />
