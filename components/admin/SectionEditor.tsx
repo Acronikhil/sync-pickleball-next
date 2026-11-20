@@ -21,6 +21,7 @@ const SECTION_LABELS: Record<AnySection["type"], string> = {
   hero: "Header",
   feature: "Wide card",
   trio: "Three cards",
+  gallery: "Photo gallery",
   cta: "Call to action",
 };
 
@@ -32,6 +33,8 @@ function summarise(section: AnySection): string {
     case "feature":
       return section.title;
     case "cta":
+      return section.heading.replace(/\n/g, " ").replace(/_/g, "");
+    case "gallery":
       return section.heading.replace(/\n/g, " ").replace(/_/g, "");
     case "trio":
       return section.cards
@@ -153,6 +156,13 @@ export function SectionEditor({
               preview={preview}
             />
           )}
+          {section.type === "gallery" && (
+            <GalleryFields
+              section={section}
+              onChange={onChange}
+              preview={preview}
+            />
+          )}
           {section.type === "cta" && (
             <CtaFields section={section} onChange={onChange} />
           )}
@@ -182,6 +192,12 @@ function HeroFields({
         value={section.logo}
         previewSrc={preview(section.logo)}
         onChange={(logo) => onChange({ ...section, logo })}
+      />
+      <ImageField
+        label="Background photo"
+        value={section.background ?? { src: "", alt: "" }}
+        previewSrc={section.background && preview(section.background)}
+        onChange={(background) => onChange({ ...section, background })}
       />
       <TextField
         label="Heading"
@@ -368,6 +384,136 @@ function TrioFields({
               value={card.body}
               rows={4}
               onChange={(body) => updateCard(card.id, { body })}
+            />
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function GalleryFields({
+  section,
+  onChange,
+  preview,
+}: {
+  section: Extract<BodySection, { type: "gallery" }>;
+  onChange: (section: AnySection) => void;
+  preview: Preview;
+}) {
+  function updatePhoto(
+    id: string,
+    patch: Partial<(typeof section.images)[number]>
+  ) {
+    onChange({
+      ...section,
+      images: section.images.map((photo) =>
+        photo.id === id ? { ...photo, ...patch } : photo
+      ),
+    });
+  }
+
+  function movePhoto(index: number, delta: number) {
+    const target = index + delta;
+    if (target < 0 || target >= section.images.length) return;
+    const images = [...section.images];
+    [images[index], images[target]] = [images[target], images[index]];
+    onChange({ ...section, images });
+  }
+
+  return (
+    <>
+      <TextField
+        label="Section id"
+        value={section.id}
+        hint="Used for #anchor links from buttons."
+        onChange={(id) => onChange({ ...section, id })}
+      />
+      <RichTextField
+        label="Heading"
+        value={section.heading}
+        onChange={(heading) => onChange({ ...section, heading })}
+      />
+      <TextAreaField
+        label="Intro text"
+        value={section.body}
+        rows={3}
+        onChange={(body) => onChange({ ...section, body })}
+      />
+
+      <div className="a-subsection">
+        <div className="a-subsection-head">
+          <span className="a-label">Photos</span>
+          <button
+            type="button"
+            className="a-btn a-btn-quiet a-btn-sm"
+            onClick={() =>
+              onChange({
+                ...section,
+                images: [
+                  ...section.images,
+                  {
+                    id: createId("photo"),
+                    image: { src: "/assets/images/image01.jpg", alt: "" },
+                    caption: "New photo",
+                  },
+                ],
+              })
+            }
+          >
+            + Add photo
+          </button>
+        </div>
+
+        {section.images.map((photo, index) => (
+          <div key={photo.id} className="a-nested">
+            <div className="a-nested-head">
+              <strong>{photo.caption || `Photo ${index + 1}`}</strong>
+              <div className="a-row-actions">
+                <button
+                  type="button"
+                  className="a-icon-btn"
+                  title="Move up"
+                  disabled={index === 0}
+                  onClick={() => movePhoto(index, -1)}
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  className="a-icon-btn"
+                  title="Move down"
+                  disabled={index === section.images.length - 1}
+                  onClick={() => movePhoto(index, 1)}
+                >
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  className="a-icon-btn a-danger"
+                  title="Delete photo"
+                  onClick={() =>
+                    onChange({
+                      ...section,
+                      images: section.images.filter((p) => p.id !== photo.id),
+                    })
+                  }
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <ImageField
+              label="Image"
+              value={photo.image}
+              previewSrc={preview(photo.image)}
+              onChange={(image) => updatePhoto(photo.id, { image })}
+            />
+            <TextField
+              label="Caption"
+              value={photo.caption}
+              onChange={(caption) => updatePhoto(photo.id, { caption })}
             />
           </div>
         ))}

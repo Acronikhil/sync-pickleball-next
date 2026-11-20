@@ -40,6 +40,11 @@ export interface HeroSection {
   id: string;
   type: "hero";
   logo: ImageRef;
+  /**
+   * Full-bleed photo behind the header. Optional because content committed
+   * before this field existed doesn't have it.
+   */
+  background?: ImageRef;
   heading: string;
   body: string;
   buttons: Button[];
@@ -78,7 +83,26 @@ export interface CtaSection {
   buttons: Button[];
 }
 
-export type BodySection = FeatureSection | TrioSection | CtaSection;
+export interface GalleryImage {
+  id: string;
+  image: ImageRef;
+  caption: string;
+}
+
+export interface GallerySection {
+  id: string;
+  type: "gallery";
+  /** Supports the mini rich-text format — see formatRichText(). */
+  heading: string;
+  body: string;
+  images: GalleryImage[];
+}
+
+export type BodySection =
+  | FeatureSection
+  | TrioSection
+  | GallerySection
+  | CtaSection;
 export type SectionType = BodySection["type"];
 export type AnySection = HeroSection | BodySection;
 
@@ -106,6 +130,7 @@ export interface SiteContent {
   footer: FooterContent;
   cursor: {
     enabled: boolean;
+    /** Left over from the old pickleball cursor; no longer rendered. */
     image: string;
   };
 }
@@ -170,6 +195,18 @@ export function createSection(type: SectionType): BodySection {
           image: { src: `/assets/images/image0${n + 2}.jpg`, alt: "" },
           title: `Card ${n}`,
           body: "Say something short and punchy.",
+        })),
+      };
+    case "gallery":
+      return {
+        id: createId("gallery"),
+        type: "gallery",
+        heading: "Inside _Sync_",
+        body: "Take a look around.",
+        images: [1, 2, 3].map((n) => ({
+          id: createId("photo"),
+          image: { src: `/assets/images/image0${n}.jpg`, alt: "" },
+          caption: `Photo ${n}`,
         })),
       };
     case "cta":

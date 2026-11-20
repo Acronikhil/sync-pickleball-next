@@ -1,43 +1,56 @@
 import type { Button } from "@/lib/content";
-import { ButtonIcon } from "./Icon";
+import { Icon } from "./Icon";
 
 /**
- * A call-to-action button. An empty `href` renders the inert `role="button"`
- * anchor the original markup used for not-yet-wired links (Explore Cafe etc.),
- * so those keep looking right until the admin gives them a destination.
+ * A pill call-to-action. "primary" is the lime Book Now treatment; everything
+ * else is a frosted outline. An empty `href` renders an inert button-looking
+ * anchor, so not-yet-wired links (Explore Cafe etc.) still look right until
+ * the admin gives them a destination.
  */
 export function ActionButton({
   button,
   className = "",
-  style,
 }: {
   button: Button;
   className?: string;
-  style?: React.CSSProperties;
 }) {
   const isPrimary = button.emphasis === "primary";
+  const external = button.newTab && button.href !== "";
+
   const classes = [
-    "btn",
-    isPrimary ? "active" : "",
-    "btn-outline-secondary",
-    "d-flex justify-content-center align-items-center gap-2 px-4 rounded-5",
+    "group inline-flex items-center gap-3 rounded-full py-2 pl-6 pr-2 text-[0.95rem] font-semibold tracking-tight transition-all duration-300",
+    isPrimary
+      ? "bg-lime text-night shadow-[0_10px_40px_-10px] shadow-lime/60 hover:-translate-y-0.5 hover:shadow-lime/80"
+      : "border border-white/20 bg-white/5 text-cream backdrop-blur-md hover:border-white/40 hover:bg-white/10",
+    button.icon === "none" ? "pr-6 py-3.5" : "",
+    button.href ? "cursor-pointer" : "cursor-default",
     className,
   ]
     .filter(Boolean)
     .join(" ");
 
-  const external = button.newTab && button.href !== "";
-
   return (
     <a
       role="button"
       className={classes}
-      style={style}
       {...(button.href ? { href: button.href } : {})}
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
     >
       {button.label}
-      <ButtonIcon name={button.icon} primary={isPrimary} />
+      {button.icon !== "none" && (
+        <span
+          className={`grid size-10 place-items-center rounded-full text-lg transition-transform duration-300 ${
+            isPrimary ? "bg-night text-lime" : "bg-cream text-night"
+          } ${
+            // Only the right arrow tilts toward "go"; other icons just pop.
+            button.icon === "arrow-right"
+              ? "group-hover:-rotate-45"
+              : "group-hover:scale-110"
+          }`}
+        >
+          <Icon name={button.icon} />
+        </span>
+      )}
     </a>
   );
 }

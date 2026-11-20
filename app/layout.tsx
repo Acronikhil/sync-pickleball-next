@@ -1,6 +1,27 @@
 import type { Metadata, Viewport } from "next";
+import { Bricolage_Grotesque, Inter, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/site.config";
+
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-bricolage",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const instrument = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-instrument",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.site.url),
@@ -22,11 +43,18 @@ export const metadata: Metadata = {
     : { index: false, follow: false },
   icons: { icon: "/assets/favicon_io_sync/favicon_2.ico" },
   alternates: { canonical: "/" },
+  openGraph: {
+    title: "Sync Pickleball – Club & Café, Indore",
+    description:
+      "Pro-grade courts, a cutesy café and a buzzing community. Book your slot today!",
+    images: ["/assets/venue/courts-night.jpg"],
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#0d0820",
 };
 
 const organizationSchema = {
@@ -37,34 +65,20 @@ const organizationSchema = {
   logo: `${siteConfig.site.url}/assets/logo.png`,
 };
 
+/** Runs before paint so scroll-reveal elements never flash. See globals.css. */
+const motionFlag = `if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("js")`;
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      className={`${bricolage.variable} ${inter.variable} ${instrument.variable}`}
+      suppressHydrationWarning
+    >
       <head>
-        {/* Third-party CSS stays on CDNs, exactly as the original site loaded it,
-            so the visual result is unchanged. */}
-        <link
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?display=swap&family=Montserrat:ital,wght@0,500;1,500&family=Inter:ital,wght@0,400;0,500;1,400;1,500&family=Open+Sans:ital,wght@0,400;1,400"
-          rel="stylesheet"
-        />
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
-        />
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
-        />
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
-        />
+        <script dangerouslySetInnerHTML={{ __html: motionFlag }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

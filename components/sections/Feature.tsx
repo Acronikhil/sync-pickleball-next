@@ -1,65 +1,65 @@
 import type { FeatureSection } from "@/lib/content";
 import { ActionButton } from "../ActionButton";
+import { FlowText } from "../FlowText";
 
 /**
- * The wide "glow card" rows. `imageSide` flips the columns on desktop while
- * keeping the image first on mobile, matching the original ordering classes.
+ * Editorial split row: a tall photo that wipes open as it scrolls in (with a
+ * slow parallax inside the frame), beside an oversized index number, title and
+ * copy. `imageSide` flips the columns on desktop; below that the photo always
+ * comes first.
  */
-export function Feature({ data }: { data: FeatureSection }) {
-  const imageFirst = data.imageSide === "left";
+export function Feature({
+  data,
+  index,
+}: {
+  data: FeatureSection;
+  /** 1-based position among the page's feature rows, shown as "01", "02"… */
+  index: number;
+}) {
+  const imageRight = data.imageSide === "right";
 
   return (
-    <section
-      id={data.id}
-      className="main container rounded-5 d-flex justify-content-center align-items-center py-5 flex-column"
-    >
-      <div className="glow-card w-100 p-xl-5 rounded-5" style={{ maxWidth: 960 }}>
-        <div className="row g-4 m-xl-5">
+    <section id={data.id} className="scroll-mt-24 px-4 py-20 sm:px-6 md:py-32">
+      <div className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-12 lg:gap-16">
+        <div
+          className={`lg:col-span-7 ${imageRight ? "lg:order-2" : ""}`}
+        >
           <div
-            className={`col-md-5 ${
-              imageFirst ? "order-1" : "order-1 order-md-2"
-            }`}
+            data-clip
+            className="relative aspect-[4/5] overflow-hidden rounded-4xl bg-plum sm:aspect-[16/11] lg:aspect-[5/6]"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
+              data-parallax="8"
               src={data.image.src}
-              className="img-fluid w-100 rounded-5"
-              style={{
-                objectFit: "cover",
-                maxHeight: 300,
-                aspectRatio: "4 / 3",
-              }}
               alt={data.image.alt}
+              loading="lazy"
+              className="absolute inset-x-0 -top-[10%] h-[120%] w-full object-cover"
             />
+            <div className="absolute inset-0 bg-gradient-to-t from-night/50 via-transparent to-transparent" />
           </div>
+        </div>
 
-          <div
-            className={`col-md-7 d-flex align-items-center ${
-              imageFirst ? "order-2" : "order-2 order-md-1"
-            }`}
+        <div className={`lg:col-span-5 ${imageRight ? "lg:order-1" : ""}`}>
+          <div data-reveal>
+            <FlowText text={String(index).padStart(2, "0")} className="h-16 md:h-24" />
+          </div>
+          <h2
+            data-reveal
+            className="mt-4 font-display text-4xl font-bold leading-[0.95] tracking-tight text-cream md:text-6xl"
           >
-            <div className="card-body d-flex align-items-center flex-column gap-3 h-100 px-4 text-md-start text-center w-100">
-              <h1 className="card-title" data-aos="fade-up">
-                {data.title}
-              </h1>
-              <p
-                className="card-text animated-card-text"
-                data-aos="flip-up"
-                data-aos-delay="100"
-                data-aos-duration="1250"
-              >
-                {data.body}
-              </p>
+            {data.title}
+          </h2>
+          <p data-reveal="0.1" className="mt-6 text-base leading-relaxed text-mist/75 md:text-lg">
+            {data.body}
+          </p>
+          {data.buttons.length > 0 && (
+            <div data-reveal="0.2" className="mt-9 flex flex-wrap gap-3">
               {data.buttons.map((button) => (
-                <ActionButton
-                  key={button.id}
-                  button={button}
-                  className="align-self-start d-inline-flex mx-md-0 mx-auto"
-                  style={{ width: "auto", color: "aliceblue" }}
-                />
+                <ActionButton key={button.id} button={button} />
               ))}
             </div>
-          </div>
+          )}
         </div>
       </div>
     </section>

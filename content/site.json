@@ -7,6 +7,10 @@
       "src": "/assets/logo.png",
       "alt": "Sync logo"
     },
+    "background": {
+      "src": "/assets/venue/courts-night.jpg",
+      "alt": "Sync Pickleball courts lit up at night with the café behind"
+    },
     "heading": "SERVE. RALLY. SYNC.",
     "body": "Sync is Indore’s first premium pickleball club and café, where pro-level courts meet laid-back vibes and a buzzing community of passionate players. Whether you’re just starting or smashing aces, you’ll feel right at home. Slots are limited, the energy is unmatched — don’t miss your chance to be part of it.",
     "buttons": [
@@ -33,8 +37,8 @@
       "id": "feature-cafe",
       "type": "feature",
       "image": {
-        "src": "/assets/images/image01.jpg",
-        "alt": "Café seating at Sync Pickleball"
+        "src": "/assets/venue/cafe-murals.jpg",
+        "alt": "Open-air café seating beside the Sync mural wall"
       },
       "imageSide": "left",
       "title": "Serve, Sip, and Socialize!",
@@ -43,7 +47,7 @@
         {
           "id": "btn-cafe",
           "label": "Explore Cafe",
-          "href": "",
+          "href": "#gallery-inside",
           "icon": "arrow-right",
           "newTab": false,
           "emphasis": "secondary"
@@ -54,8 +58,8 @@
       "id": "feature-courts",
       "type": "feature",
       "image": {
-        "src": "/assets/images/image02.jpg",
-        "alt": "Tournament-grade pickleball court"
+        "src": "/assets/venue/court-covered.jpg",
+        "alt": "Covered purple pickleball court with the Sync logo"
       },
       "imageSide": "right",
       "title": "Courts Crafted for Champions",
@@ -64,7 +68,7 @@
         {
           "id": "btn-gallery",
           "label": "View Gallery",
-          "href": "",
+          "href": "#gallery-inside",
           "icon": "arrow-right",
           "newTab": false,
           "emphasis": "secondary"
@@ -87,8 +91,8 @@
         {
           "id": "card-indoor",
           "image": {
-            "src": "/assets/images/image04.jpg",
-            "alt": "Indoor court with open-air feel"
+            "src": "/assets/venue/court-logo.jpg",
+            "alt": "Sync logo painted on the court under a covered roof"
           },
           "title": "Indoor _Comfort,_\n_Outdoor Feels_",
           "body": "Enjoy the best of both worlds. Fresh air, zero glare. Whether it shines or pours, the court's all yours."
@@ -96,8 +100,8 @@
         {
           "id": "card-hangout",
           "image": {
-            "src": "/assets/images/image05.jpg",
-            "alt": "Hangout and green zones"
+            "src": "/assets/venue/penguin-night.jpg",
+            "alt": "Penguin mascot and string-lit hangout area at night"
           },
           "title": "Pull Up,\n_Hang Out_",
           "body": "Green pockets and hangout zones to unwind, connect, or simply do nothing (and love it). And spacious parking—because stressing about it isn’t on today’s to-do list."
@@ -105,11 +109,75 @@
       ]
     },
     {
+      "id": "gallery-inside",
+      "type": "gallery",
+      "heading": "Inside\n_Sync_",
+      "body": "Purple courts, string lights, a mural-lined café and one very friendly penguin. Here’s a peek before you visit.",
+      "images": [
+        {
+          "id": "photo-signage",
+          "image": {
+            "src": "/assets/venue/signage.jpg",
+            "alt": "Sync Pickleball Club & Café signage"
+          },
+          "caption": "Pickleball Club & Café"
+        },
+        {
+          "id": "photo-night",
+          "image": {
+            "src": "/assets/venue/courts-night.jpg",
+            "alt": "Purple courts at night with the café behind"
+          },
+          "caption": "Night sessions under the lights"
+        },
+        {
+          "id": "photo-penguin",
+          "image": {
+            "src": "/assets/venue/penguin-night.jpg",
+            "alt": "Penguin mascot beside the string-lit walkway"
+          },
+          "caption": "Say hi to our penguin"
+        },
+        {
+          "id": "photo-logo",
+          "image": {
+            "src": "/assets/venue/court-logo.jpg",
+            "alt": "Sync logo painted on the court"
+          },
+          "caption": "Our home court"
+        },
+        {
+          "id": "photo-cafe",
+          "image": {
+            "src": "/assets/venue/cafe-murals.jpg",
+            "alt": "Café tables beside the colourful mural wall"
+          },
+          "caption": "Café by the murals"
+        },
+        {
+          "id": "photo-welcome",
+          "image": {
+            "src": "/assets/venue/welcome.jpg",
+            "alt": "Welcome board at the club entrance"
+          },
+          "caption": "Welcome in"
+        },
+        {
+          "id": "photo-covered",
+          "image": {
+            "src": "/assets/venue/court-covered.jpg",
+            "alt": "Covered court with an open-air feel"
+          },
+          "caption": "Covered courts, open air"
+        }
+      ]
+    },
+    {
       "id": "feature-community",
       "type": "feature",
       "image": {
-        "src": "/assets/images/image06.jpg",
-        "alt": "Players at a Sync Pickleball event"
+        "src": "/assets/venue/welcome.jpg",
+        "alt": "Welcome board at the entrance of Sync Pickleball Club and Café"
       },
       "imageSide": "left",
       "title": "Feel The Vibe, Join The Tribe!",
@@ -128,7 +196,7 @@
     {
       "id": "cta-book",
       "type": "cta",
-      "heading": "Play Hard,\nChill Harder!",
+      "heading": "Play Hard,\n_Chill Harder!_",
       "body": "Join the pickleball party! All levels welcome—grab your spot now!",
       "buttons": [
         {

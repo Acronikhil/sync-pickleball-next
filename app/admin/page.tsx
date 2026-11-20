@@ -63,12 +63,17 @@ function withPreviews(
   const resolve = (src: string) => previews[src] ?? src;
 
   next.hero.logo.src = resolve(next.hero.logo.src);
+  if (next.hero.background) {
+    next.hero.background.src = resolve(next.hero.background.src);
+  }
   next.cursor.image = resolve(next.cursor.image);
   for (const section of next.sections) {
     if (section.type === "feature") {
       section.image.src = resolve(section.image.src);
     } else if (section.type === "trio") {
       for (const card of section.cards) card.image.src = resolve(card.image.src);
+    } else if (section.type === "gallery") {
+      for (const photo of section.images) photo.image.src = resolve(photo.image.src);
     }
   }
   return next;
@@ -254,6 +259,8 @@ export default function AdminPage() {
       copy.id = createId(copy.type);
       if (copy.type === "trio") {
         for (const card of copy.cards) card.id = createId("card");
+      } else if (copy.type === "gallery") {
+        for (const photo of copy.images) photo.id = createId("photo");
       } else {
         for (const button of copy.buttons) button.id = createId("btn");
       }
@@ -534,6 +541,13 @@ export default function AdminPage() {
                 <button
                   type="button"
                   className="a-btn a-btn-quiet a-btn-sm"
+                  onClick={() => addSection("gallery")}
+                >
+                  + Gallery
+                </button>
+                <button
+                  type="button"
+                  className="a-btn a-btn-quiet a-btn-sm"
                   onClick={() => addSection("cta")}
                 >
                   + Call to action
@@ -618,21 +632,11 @@ export default function AdminPage() {
             <div className="a-card">
               <div className="a-card-body">
                 <CheckboxField
-                  label="Show the pickleball that follows the cursor"
+                  label="Use the custom lime cursor (desktop only)"
                   checked={content.cursor.enabled}
                   onChange={(enabled) =>
                     mutate((draft) => {
                       draft.cursor.enabled = enabled;
-                    })
-                  }
-                />
-                <ImageField
-                  label="Cursor image"
-                  value={{ src: content.cursor.image, alt: "" }}
-                  previewSrc={previews[content.cursor.image]}
-                  onChange={(image) =>
-                    mutate((draft) => {
-                      draft.cursor.image = image.src;
                     })
                   }
                 />
