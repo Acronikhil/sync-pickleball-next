@@ -16,3 +16,5 @@ Thumbs.db
 
 oauth-worker/node_modules/
 oauth-worker/.wrangler/
+
+*.md

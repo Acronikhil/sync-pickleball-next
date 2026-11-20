@@ -8,6 +8,8 @@ import { ShotPicker, type Shot } from "./sections/ShotPicker";
 import { Cta } from "./sections/Cta";
 import { SiteNav, type NavLink } from "./SiteNav";
 import { SiteFooter } from "./SiteFooter";
+import { FestivalBanner } from "./FestivalBanner";
+import { activeTheme } from "@/lib/themes";
 
 /**
  * Nav links point at the page's own sections, so they keep working as the
@@ -36,12 +38,13 @@ function navLinks(sections: BodySection[]): NavLink[] {
  */
 export function SiteRenderer({ content }: { content: SiteContent }) {
   const { hero, sections } = content;
-  const snowy = content.snow?.enabled ?? false;
+  const { spec: theme, message } = activeTheme(content);
   const book = hero.buttons.find((b) => b.emphasis === "primary");
   const marqueeWords = hero.heading
     .split(/\s+/)
     .map((word) => word.replace(/[.!,]+$/, ""))
-    .filter(Boolean);
+    .filter(Boolean)
+    .concat(theme.marquee);
 
   // One ball per nav destination, plus booking if it has a link.
   const shots: Shot[] = navLinks(sections).map((link) => ({ ...link }));
@@ -61,22 +64,33 @@ export function SiteRenderer({ content }: { content: SiteContent }) {
       case "gallery":
         return <Gallery key={section.id} data={section} />;
       case "cta":
-        return <Cta key={section.id} data={section} photos={ctaPhotos} snowy={snowy} />;
+        return <Cta key={section.id} data={section} photos={ctaPhotos} theme={theme} />;
       default:
         return null;
     }
   }
 
   return (
-    <div className="site-root grain">
+    <div
+      className="site-root grain"
+      // Lets the hero subtract the banner so its buttons stay above the fold.
+      style={{ "--banner-h": message && theme.banner ? "2.6rem" : "0px" } as React.CSSProperties}
+    >
+      <a
+        href="#play"
+        className="sr-only z-[70] rounded-full bg-lime px-4 py-2 font-semibold text-night focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+      >
+        Skip to content
+      </a>
+      <FestivalBanner theme={theme} message={message} book={book} />
       <SiteNav logo={hero.logo} links={navLinks(sections)} book={book} />
       <main>
         <Hero data={hero} />
         <Marquee words={marqueeWords} />
-        <ShotPicker shots={shots} snowy={snowy} />
+        <ShotPicker shots={shots} theme={theme} />
         {sections.map(renderSection)}
       </main>
-      <SiteFooter socials={content.socials} footer={content.footer} logo={hero.logo} snowy={snowy} />
+      <SiteFooter socials={content.socials} footer={content.footer} logo={hero.logo} theme={theme} />
     </div>
   );
 }

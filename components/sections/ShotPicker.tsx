@@ -2,7 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { Penguin } from "../Penguin";
-import { SnowCap } from "../SnowCap";
+import { EdgeDecor } from "../EdgeDecor";
+import { THEMES, type ThemeSpec } from "@/lib/themes";
 
 export interface Shot {
   label: string;
@@ -53,7 +54,13 @@ function homeFor(i: number, n: number, width: number): [number, number] {
  * nudges it. Clicking, tapping or pressing Enter on a ball launches it too,
  * so it works on touch screens and from the keyboard.
  */
-export function ShotPicker({ shots, snowy = false }: { shots: Shot[]; snowy?: boolean }) {
+export function ShotPicker({
+  shots,
+  theme = THEMES.none,
+}: {
+  shots: Shot[];
+  theme?: ThemeSpec;
+}) {
   const courtRef = useRef<HTMLDivElement>(null);
   const paddleRef = useRef<HTMLDivElement>(null);
   const toastRef = useRef<HTMLParagraphElement>(null);
@@ -310,7 +317,7 @@ export function ShotPicker({ shots, snowy = false }: { shots: Shot[]; snowy?: bo
             top) so only its head and shoulders peek over the baseline. */}
         <div className="pointer-events-none absolute -top-[4.6rem] right-8 w-24 md:right-16" aria-hidden="true">
           <div ref={umpireRef}>
-            <Penguin pose="wave" className="w-full" />
+            <Penguin pose="wave" outfit={theme.outfit} className="w-full" />
           </div>
         </div>
         <p
@@ -320,8 +327,8 @@ export function ShotPicker({ shots, snowy = false }: { shots: Shot[]; snowy?: bo
           className="pointer-events-none absolute -top-16 right-36 z-30 origin-bottom-right scale-90 rounded-2xl rounded-br-sm bg-cream px-4 py-2 font-display text-sm font-bold text-night opacity-0 shadow-xl shadow-night/40 transition-all duration-300 data-[show=true]:scale-100 data-[show=true]:opacity-100 md:right-44"
         />
 
-        {/* Snow along the baseline, which the umpire stands knee-deep in. */}
-        {snowy && <SnowCap seed={7} className="pointer-events-none absolute inset-x-5 -top-3 z-[2] h-7 md:h-8" />}
+        {/* Festival trim along the baseline (the umpire stands knee-deep in snow). */}
+        <EdgeDecor edge={theme.edge} seed={7} />
 
         <div
           ref={courtRef}

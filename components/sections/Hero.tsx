@@ -13,7 +13,7 @@ export function Hero({ data }: { data: HeroSection }) {
   return (
     <section
       id="top"
-      className="relative isolate flex min-h-[100svh] items-end overflow-hidden px-4 pb-12 pt-28 sm:px-6 md:pb-16"
+      className="relative isolate flex min-h-[calc(100svh-var(--banner-h,0px))] items-end overflow-hidden px-4 pb-12 pt-28 sm:px-6 md:pb-16"
     >
       {data.background?.src && (
         <div className="absolute inset-0 -z-10 overflow-hidden">

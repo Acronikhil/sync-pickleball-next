@@ -247,6 +247,17 @@ body {
     55% { transform: translateY(-12px) scaleY(1.04); }
   }
 
+  /* StringLights bulbs: glow in their own colour, twinkling out of step. */
+  .string-bulb {
+    filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 10px currentColor);
+    animation: bulb-twinkle 2.4s ease-in-out infinite;
+  }
+
+  @keyframes bulb-twinkle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+  }
+
   /* Court-line grid used behind the CTA panel. */
   .court-lines {
     background-image:

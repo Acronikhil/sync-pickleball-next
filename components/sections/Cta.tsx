@@ -2,7 +2,8 @@ import type { CtaSection, ImageRef } from "@/lib/content";
 import { ActionButton } from "../ActionButton";
 import { Icon } from "../Icon";
 import { RichText } from "../RichText";
-import { SnowCap } from "../SnowCap";
+import { EdgeDecor } from "../EdgeDecor";
+import { THEMES, type ThemeSpec } from "@/lib/themes";
 
 /**
  * The closing "book now" panel: a court-purple slab with faint court lines,
@@ -12,19 +13,19 @@ import { SnowCap } from "../SnowCap";
 export function Cta({
   data,
   photos = [],
-  snowy = false,
+  theme = THEMES.none,
 }: {
   data: CtaSection;
   photos?: ImageRef[];
-  snowy?: boolean;
+  theme?: ThemeSpec;
 }) {
   const [left, right] = photos;
 
   return (
     <section id={data.id} className="scroll-mt-24 px-4 py-20 sm:px-6 md:py-28">
-      {/* The drift sits outside the panel, which clips its own contents. */}
+      {/* The festival trim sits outside the panel, which clips its own contents. */}
       <div data-reveal className="relative mx-auto max-w-6xl">
-      {snowy && <SnowCap seed={3} className="absolute inset-x-6 -top-3.5 z-10 h-7 md:inset-x-10 md:h-9" />}
+      <EdgeDecor edge={theme.edge} seed={3} />
       <div
         className="relative isolate overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-court via-[#5537a8] to-plum px-6 py-20 text-center md:px-16 md:py-28"
       >

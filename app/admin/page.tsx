@@ -33,8 +33,10 @@ import { GoogleSignInButton } from "@/components/admin/GoogleSignInButton";
 import {
   CheckboxField,
   ImageField,
+  SelectField,
   TextField,
 } from "@/components/admin/Fields";
+import { activeTheme, THEME_NAMES, THEMES } from "@/lib/themes";
 
 const DRAFT_KEY = "sync-admin-draft";
 
@@ -640,15 +642,47 @@ export default function AdminPage() {
                     })
                   }
                 />
-                <CheckboxField
-                  label="Winter mode: falling snow and snowy edges"
-                  checked={content.snow?.enabled ?? false}
-                  onChange={(enabled) =>
+              </div>
+            </div>
+
+            <h2 className="a-section-title">Festival theme</h2>
+            <div className="a-card">
+              <div className="a-card-body">
+                <SelectField
+                  label="Theme"
+                  value={activeTheme(content).name}
+                  options={THEME_NAMES.map((name) => ({
+                    value: name,
+                    label: THEMES[name].label,
+                  }))}
+                  onChange={(name) =>
                     mutate((draft) => {
-                      draft.snow = { enabled };
+                      draft.theme = { name, message: draft.theme?.message ?? "" };
+                      delete draft.snow;
                     })
                   }
                 />
+                {activeTheme(content).name !== "none" && (
+                  <TextField
+                    label="Banner message"
+                    value={content.theme?.message ?? ""}
+                    hint={`Leave empty for: “${THEMES[activeTheme(content).name].defaultMessage}”`}
+                    onChange={(message) =>
+                      mutate((draft) => {
+                        draft.theme = {
+                          name: activeTheme(draft).name,
+                          message,
+                        };
+                        delete draft.snow;
+                      })
+                    }
+                  />
+                )}
+                <p className="a-hint">
+                  Dresses the whole site for the occasion: falling snow,
+                  confetti, sparks or colours, decorations on the cards, a
+                  banner at the top and an outfit for the penguin.
+                </p>
               </div>
             </div>
 

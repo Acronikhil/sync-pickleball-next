@@ -7,6 +7,8 @@
  * these types, so adding a field here is how you make it editable.
  */
 
+import type { ThemeName } from "./themes";
+
 export const ICON_NAMES = [
   "none",
   "arrow-right",
@@ -134,9 +136,15 @@ export interface SiteContent {
     image: string;
   };
   /**
-   * Winter dress: falling snow plus drifts on cards and under the penguins.
-   * Optional because content saved before it existed doesn't have it (off).
+   * Festival theme (see lib/themes.ts). Optional because content saved before
+   * it existed doesn't have it. `message` is the banner text; empty means the
+   * theme's default.
    */
+  theme?: {
+    name: ThemeName;
+    message: string;
+  };
+  /** Superseded by `theme` ("christmas"); still read from older content. */
   snow?: {
     enabled: boolean;
   };
