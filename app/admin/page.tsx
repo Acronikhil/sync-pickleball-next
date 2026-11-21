@@ -7,6 +7,7 @@ import { siteConfig } from "@/site.config";
 import {
   createId,
   createSection,
+  emptyClubInfo,
   type AnySection,
   type BodySection,
   type SectionType,
@@ -37,6 +38,7 @@ import {
   TextField,
 } from "@/components/admin/Fields";
 import { activeTheme, THEME_NAMES, THEMES } from "@/lib/themes";
+import { InfoEditor } from "@/components/admin/InfoEditor";
 
 const DRAFT_KEY = "sync-admin-draft";
 
@@ -555,6 +557,20 @@ export default function AdminPage() {
                   + Call to action
                 </button>
               </span>
+            </div>
+
+            <h2 className="a-section-title">Club info</h2>
+            <div className="a-card">
+              <div className="a-card-body">
+                <InfoEditor
+                  info={content.info ?? emptyClubInfo()}
+                  onChange={(info) =>
+                    mutate((draft) => {
+                      draft.info = info;
+                    })
+                  }
+                />
+              </div>
             </div>
 
             <h2 className="a-section-title">Contact links</h2>

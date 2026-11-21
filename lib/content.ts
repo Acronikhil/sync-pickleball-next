@@ -123,6 +123,41 @@ export interface FooterContent {
   creditHref: string;
 }
 
+/** One line of a two-column list: "Mon to Fri" / "6 am to 11 pm", "Cold coffee" / "₹180". */
+export interface InfoRow {
+  id: string;
+  label: string;
+  value: string;
+}
+
+export interface Review {
+  id: string;
+  quote: string;
+  name: string;
+  /** 1 to 5 stars. */
+  rating: number;
+}
+
+/**
+ * Practical details for visitors. Every block starts switched off and empty:
+ * the site only shows what the club has filled in and turned on.
+ */
+export interface ClubInfo {
+  hours: { enabled: boolean; rows: InfoRow[] };
+  prices: { enabled: boolean; note: string; rows: InfoRow[] };
+  menu: { enabled: boolean; rows: InfoRow[] };
+  reviews: { enabled: boolean; items: Review[] };
+}
+
+export function emptyClubInfo(): ClubInfo {
+  return {
+    hours: { enabled: false, rows: [] },
+    prices: { enabled: false, note: "", rows: [] },
+    menu: { enabled: false, rows: [] },
+    reviews: { enabled: false, items: [] },
+  };
+}
+
 export interface SiteContent {
   /** Bumped when the shape changes, so old drafts can be detected. */
   version: number;
@@ -144,6 +179,8 @@ export interface SiteContent {
     name: ThemeName;
     message: string;
   };
+  /** Hours, prices, menu and reviews. Optional: older content has none. */
+  info?: ClubInfo;
   /** Superseded by `theme` ("christmas"); still read from older content. */
   snow?: {
     enabled: boolean;

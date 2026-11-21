@@ -85,7 +85,7 @@ body {
     box-sizing: border-box;
   }
 
-  .site-root :where(h1, h2, h3, h4, p, figure, ul) {
+  .site-root :where(h1, h2, h3, h4, p, figure, ul, blockquote, dl, dd) {
     margin: 0;
     padding: 0;
   }

@@ -4,6 +4,7 @@ import { Marquee } from "./sections/Marquee";
 import { Feature } from "./sections/Feature";
 import { Trio } from "./sections/Trio";
 import { Gallery } from "./sections/Gallery";
+import { ClubInfo, hasClubInfo } from "./sections/ClubInfo";
 import { ShotPicker, type Shot } from "./sections/ShotPicker";
 import { Cta } from "./sections/Cta";
 import { SiteNav, type NavLink } from "./SiteNav";
@@ -16,7 +17,7 @@ import { activeTheme } from "@/lib/themes";
  * admin adds, removes or reorders them. Labels are short, fixed names per
  * section kind; section titles are too long for a nav bar.
  */
-function navLinks(sections: BodySection[]): NavLink[] {
+function navLinks(sections: BodySection[], showInfo: boolean): NavLink[] {
   const features = sections.filter((s) => s.type === "feature");
   const trio = sections.find((s) => s.type === "trio");
   const links: NavLink[] = [];
@@ -27,6 +28,7 @@ function navLinks(sections: BodySection[]): NavLink[] {
   if (features.length > 1) {
     links.push({ href: `#${features[features.length - 1].id}`, label: "Community" });
   }
+  if (showInfo) links.push({ href: "#info", label: "Info" });
   links.push({ href: "#visit", label: "Visit" });
   return links;
 }
@@ -39,6 +41,18 @@ function navLinks(sections: BodySection[]): NavLink[] {
 export function SiteRenderer({ content }: { content: SiteContent }) {
   const { hero, sections } = content;
   const { spec: theme, message } = activeTheme(content);
+  const showInfo = hasClubInfo(content.info);
+
+  // "Plan your visit" goes just before the closing booking panel, or last
+  // if there isn't one.
+  const withInfo = (rendered: React.ReactNode[]) => {
+    if (!showInfo) return rendered;
+    const info = <ClubInfo key="club-info" info={content.info} />;
+    const cta = sections.findIndex((s) => s.type === "cta");
+    return cta === -1
+      ? [...rendered, info]
+      : [...rendered.slice(0, cta), info, ...rendered.slice(cta)];
+  };
   const book = hero.buttons.find((b) => b.emphasis === "primary");
   const marqueeWords = hero.heading
     .split(/\s+/)
@@ -47,7 +61,7 @@ export function SiteRenderer({ content }: { content: SiteContent }) {
     .concat(theme.marquee);
 
   // One ball per nav destination, plus booking if it has a link.
-  const shots: Shot[] = navLinks(sections).map((link) => ({ ...link }));
+  const shots: Shot[] = navLinks(sections, showInfo).map((link) => ({ ...link }));
   if (book?.href) shots.push({ label: book.label, href: book.href, newTab: book.newTab });
 
   // Snapshots for the CTA's corners: the first two feature photos.
@@ -83,12 +97,12 @@ export function SiteRenderer({ content }: { content: SiteContent }) {
         Skip to content
       </a>
       <FestivalBanner theme={theme} message={message} book={book} />
-      <SiteNav logo={hero.logo} links={navLinks(sections)} book={book} />
+      <SiteNav logo={hero.logo} links={navLinks(sections, showInfo)} book={book} />
       <main>
         <Hero data={hero} />
         <Marquee words={marqueeWords} />
         <ShotPicker shots={shots} theme={theme} />
-        {sections.map(renderSection)}
+        {withInfo(sections.map(renderSection))}
       </main>
       <SiteFooter socials={content.socials} footer={content.footer} logo={hero.logo} theme={theme} />
     </div>

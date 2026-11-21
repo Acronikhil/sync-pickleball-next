@@ -249,5 +249,24 @@
   "theme": {
     "name": "christmas",
     "message": ""
+  },
+  "info": {
+    "hours": {
+      "enabled": false,
+      "rows": []
+    },
+    "prices": {
+      "enabled": false,
+      "note": "",
+      "rows": []
+    },
+    "menu": {
+      "enabled": false,
+      "rows": []
+    },
+    "reviews": {
+      "enabled": false,
+      "items": []
+    }
   }
 }
