@@ -1,12 +1,14 @@
 import type { HeroSection } from "@/lib/content";
 import { ActionButton } from "../ActionButton";
 import { Icon } from "../Icon";
+import { HangingDecor } from "../HangingDecor";
+import { THEMES, type ThemeSpec } from "@/lib/themes";
 
 /**
  * Full-bleed photo header. The heading is split into words so each can rise
  * in on its own; the last word picks up the lime accent ("SYNC.").
  */
-export function Hero({ data }: { data: HeroSection }) {
+export function Hero({ data, theme = THEMES.none }: { data: HeroSection; theme?: ThemeSpec }) {
   const words = data.heading.split(/\s+/).filter(Boolean);
   const book = data.buttons.find((b) => b.emphasis === "primary" && b.href);
 
@@ -30,7 +32,17 @@ export function Hero({ data }: { data: HeroSection }) {
       {/* Darken toward the copy, and tint toward the brand's night purple. */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-night via-night/70 to-night/20" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-night/80 via-court/10 to-transparent mix-blend-multiply" />
-      <div className="absolute -left-40 top-1/3 -z-10 size-[36rem] rounded-full bg-court/40 blur-[120px]" />
+      <div
+        className="absolute -left-40 top-1/3 -z-10 size-[36rem] rounded-full bg-court/40 blur-[120px]"
+        style={theme.glow ? { backgroundColor: theme.glow } : undefined}
+      />
+      {theme.glow && (
+        <div
+          className="absolute -right-32 -top-20 -z-10 size-[30rem] rounded-full blur-[120px]"
+          style={{ backgroundColor: theme.glow }}
+        />
+      )}
+      <HangingDecor kind={theme.hanging} />
 
       <div className="mx-auto grid w-full max-w-6xl items-end gap-12 lg:grid-cols-[1fr_auto]">
         <div>

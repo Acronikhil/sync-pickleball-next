@@ -311,6 +311,41 @@ body {
     }
   }
 
+  /* HangingDecor: each ornament swings from the top of its string. */
+  .hanging-item {
+    transform-origin: top center;
+    animation: hang-sway 4.5s ease-in-out infinite;
+  }
+
+  @keyframes hang-sway {
+    0%, 100% { transform: rotate(-4deg); }
+    50% { transform: rotate(4deg); }
+  }
+
+  .holi-burst {
+    opacity: 0.75;
+    mix-blend-mode: screen;
+    filter: blur(4px);
+    animation: holi-breathe 7s ease-in-out infinite;
+  }
+
+  @keyframes holi-breathe {
+    0%, 100% { transform: scale(0.9); opacity: 0.6; }
+    50% { transform: scale(1.12); opacity: 0.85; }
+  }
+
+  /* Bunting flags flutter about the top edge they hang from. */
+  .bunting-flag {
+    transform-box: fill-box;
+    transform-origin: top center;
+    animation: flag-flutter 2s ease-in-out infinite;
+  }
+
+  @keyframes flag-flutter {
+    0%, 100% { transform: rotate(-6deg); }
+    50% { transform: rotate(6deg); }
+  }
+
   /* StringLights bulbs: glow in their own colour, twinkling out of step. */
   .string-bulb {
     filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 10px currentColor);

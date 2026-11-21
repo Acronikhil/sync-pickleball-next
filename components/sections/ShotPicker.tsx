@@ -328,7 +328,7 @@ export function ShotPicker({
         />
 
         {/* Festival trim along the baseline (the umpire stands knee-deep in snow). */}
-        <EdgeDecor edge={theme.edge} seed={7} />
+        <EdgeDecor edge={theme.edge} seed={7} colors={theme.bunting} />
 
         <div
           ref={courtRef}

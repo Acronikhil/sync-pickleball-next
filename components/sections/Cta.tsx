@@ -25,7 +25,7 @@ export function Cta({
     <section id={data.id} className="scroll-mt-24 px-4 py-20 sm:px-6 md:py-28">
       {/* The festival trim sits outside the panel, which clips its own contents. */}
       <div data-reveal className="relative mx-auto max-w-6xl">
-      <EdgeDecor edge={theme.edge} seed={3} />
+      <EdgeDecor edge={theme.edge} seed={3} colors={theme.bunting} />
       <div
         className="relative isolate overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-court via-[#5537a8] to-plum px-6 py-20 text-center md:px-16 md:py-28"
       >

@@ -99,8 +99,8 @@ export function SiteRenderer({ content }: { content: SiteContent }) {
       <FestivalBanner theme={theme} message={message} book={book} />
       <SiteNav logo={hero.logo} links={navLinks(sections, showInfo)} book={book} />
       <main>
-        <Hero data={hero} />
-        <Marquee words={marqueeWords} />
+        <Hero data={hero} theme={theme} />
+        <Marquee words={marqueeWords} colors={theme.ticker} />
         <ShotPicker shots={shots} theme={theme} />
         {withInfo(sections.map(renderSection))}
       </main>

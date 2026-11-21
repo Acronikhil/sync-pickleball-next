@@ -23,7 +23,15 @@ export interface ThemeSpec {
   /** Icon on the visitor's on/off toggle for the particles. */
   toggleIcon: string;
   /** What sits on the top edge of the court and booking panel. */
-  edge: "none" | "snow" | "lights";
+  edge: "none" | "snow" | "lights" | "bunting";
+  /** Flag colours, for the bunting edge. */
+  bunting?: string[];
+  /** What hangs over the header photo (see HangingDecor). */
+  hanging: "none" | "baubles" | "lanterns" | "stars" | "splashes";
+  /** Colour of the glow behind the header text. */
+  glow?: string;
+  /** The ticker band's colours, replacing the everyday lime. */
+  ticker?: { background: string; text: string; icon: string };
   /** Snow mounds under the penguins' feet. */
   mounds: boolean;
   /** What the penguin wears. */
@@ -39,6 +47,7 @@ export interface ThemeSpec {
 export const THEMES: Record<ThemeName, ThemeSpec> = {
   none: {
     label: "None (everyday look)",
+    hanging: "none",
     particles: "none",
     toggleIcon: "",
     edge: "none",
@@ -50,6 +59,9 @@ export const THEMES: Record<ThemeName, ThemeSpec> = {
   },
   christmas: {
     label: "Christmas",
+    hanging: "baubles",
+    glow: "rgb(200 40 61 / 0.35)",
+    ticker: { background: "#1f7a4d", text: "#f7f4ff", icon: "#ff5a6e" },
     particles: "snow",
     toggleIcon: "❄",
     edge: "snow",
@@ -61,9 +73,13 @@ export const THEMES: Record<ThemeName, ThemeSpec> = {
   },
   newyear: {
     label: "New Year",
+    hanging: "stars",
+    glow: "rgb(224 184 74 / 0.3)",
+    bunting: ["#d8f65a", "#8a5cff", "#ffd166", "#ff8a65", "#b7a2f2"],
+    ticker: { background: "linear-gradient(90deg, #f5d76e, #e0b84a, #f5d76e)", text: "#0d0820", icon: "#6a4fc0" },
     particles: "confetti",
     toggleIcon: "🎉",
-    edge: "none",
+    edge: "bunting",
     mounds: false,
     outfit: "party",
     defaultMessage: "Happy New Year! Start the year with a rally 🎉",
@@ -72,6 +88,9 @@ export const THEMES: Record<ThemeName, ThemeSpec> = {
   },
   diwali: {
     label: "Diwali",
+    hanging: "lanterns",
+    glow: "rgb(245 158 11 / 0.35)",
+    ticker: { background: "#f59e0b", text: "#2a1206", icon: "#b91c1c" },
     particles: "embers",
     toggleIcon: "✨",
     edge: "lights",
@@ -83,9 +102,13 @@ export const THEMES: Record<ThemeName, ThemeSpec> = {
   },
   holi: {
     label: "Holi",
+    hanging: "splashes",
+    glow: "rgb(226 64 122 / 0.3)",
+    bunting: ["#e2407a", "#f2a52b", "#39b37a", "#4a7be0", "#a35ce0"],
+    ticker: { background: "linear-gradient(90deg, #ff8fb3, #ffd166, #8ee6a8, #8fb8ff, #c9a2ff)", text: "#0d0820", icon: "#e2407a" },
     particles: "colors",
     toggleIcon: "🎨",
-    edge: "none",
+    edge: "bunting",
     mounds: false,
     outfit: "holi",
     defaultMessage: "Happy Holi! Come play in colour 🎨",
@@ -94,6 +117,9 @@ export const THEMES: Record<ThemeName, ThemeSpec> = {
   },
   anniversary: {
     label: "Club anniversary",
+    hanging: "stars",
+    glow: "rgb(138 92 255 / 0.4)",
+    ticker: { background: "#b7a2f2", text: "#0d0820", icon: "#6a4fc0" },
     particles: "confetti",
     toggleIcon: "🎉",
     edge: "lights",
