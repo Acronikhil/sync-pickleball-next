@@ -27,8 +27,10 @@ import {
 } from "@/lib/auth";
 import { PublishError, publishContent, type PendingFile } from "@/lib/publish";
 import { formatBytes, prepareImage } from "@/lib/image";
-import { SiteRenderer } from "@/components/SiteRenderer";
 import { SectionEditor } from "@/components/admin/SectionEditor";
+import { PreviewFrame, type PreviewDevice } from "@/components/admin/PreviewFrame";
+import { AdminHelp } from "@/components/admin/AdminHelp";
+import { AdminTour, TOUR_DONE_KEY } from "@/components/admin/AdminTour";
 import { UploadProvider } from "@/components/admin/UploadContext";
 import { GoogleSignInButton } from "@/components/admin/GoogleSignInButton";
 import {
@@ -41,6 +43,26 @@ import { activeTheme, THEME_NAMES, THEMES } from "@/lib/themes";
 import { InfoEditor } from "@/components/admin/InfoEditor";
 
 const DRAFT_KEY = "sync-admin-draft";
+
+/** The editor's areas, in menu order. `focus` is where the preview scrolls. */
+const AREAS = [
+  { id: "header", label: "Header", focus: "#top", hint: "Logo, headline, intro text, background photo and buttons at the top of the page." },
+  { id: "sections", label: "Page sections", focus: "#main", hint: "The blocks that make up the page. Open one to edit it, reorder them or add new ones." },
+  { id: "info", label: "Club info", focus: "#info", hint: "Opening hours, prices, café menu and reviews. Each one has its own switch." },
+  { id: "festival", label: "Festival theme", focus: "#top", hint: "Dress the whole site up for Christmas, Diwali, Holi, New Year or the club anniversary." },
+  { id: "contact", label: "Contact & footer", focus: "#visit", hint: "Phone, Instagram, email and map links, plus the lines at the very bottom." },
+  { id: "settings", label: "Settings", focus: "#top", hint: "Extra touches, and where to watch the site update after you publish." },
+] as const;
+
+type AreaId = (typeof AREAS)[number]["id"];
+
+/** What each kind of new section looks like, for the "Add a section" cards. */
+const NEW_SECTIONS: { type: SectionType; label: string; hint: string }[] = [
+  { type: "feature", label: "Wide card", hint: "A big photo beside a title, text and buttons." },
+  { type: "trio", label: "Three cards", hint: "Three photos, each with a short title and text." },
+  { type: "gallery", label: "Gallery", hint: "A strip of photos visitors scroll sideways." },
+  { type: "cta", label: "Call to action", hint: "A bold panel with a heading and a booking button." },
+];
 
 type Phase = "loading" | "anon" | "denied" | "ready";
 
@@ -93,6 +115,11 @@ export default function AdminPage() {
   const [status, setStatus] = useState<Status>({ tone: "idle", message: "" });
   const [publishing, setPublishing] = useState(false);
   const [mobileView, setMobileView] = useState<"editor" | "preview">("editor");
+  const [area, setArea] = useState<AreaId>("header");
+  const [device, setDevice] = useState<PreviewDevice>("desktop");
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const tokenRef = useRef<string | null>(null);
 
   const serialised = useMemo(
@@ -100,7 +127,13 @@ export default function AdminPage() {
     [content]
   );
   const isDirty = baseline !== "" && serialised !== baseline;
-  const hasUploads = uploads.length > 0;
+  // Only photos the page still points at get published. One that was
+  // replaced again before publishing would otherwise be committed for nothing.
+  const usedUploads = useMemo(
+    () => uploads.filter((upload) => serialised.includes(upload.src)),
+    [uploads, serialised]
+  );
+  const hasUploads = usedUploads.length > 0;
 
   const previews = useMemo(
     () => Object.fromEntries(uploads.map((u) => [u.src, u.previewUrl])),
@@ -187,6 +220,19 @@ export default function AdminPage() {
     // Simplest correct way to re-run the sign-in effect cleanly.
     window.location.reload();
   }, []);
+
+  // First visit: run the tour once the editor has loaded.
+  useEffect(() => {
+    if (phase !== "ready") return;
+    let done = false;
+    try {
+      done = localStorage.getItem(TOUR_DONE_KEY) === "1";
+    } catch {}
+    if (!done) {
+      const t = window.setTimeout(() => setTourOpen(true), 900);
+      return () => window.clearTimeout(t);
+    }
+  }, [phase]);
 
   /* --------------------------- draft handling --------------------------- */
 
@@ -299,14 +345,14 @@ export default function AdminPage() {
 
     const files: PendingFile[] = [
       { path: siteConfig.contentPath, base64: encodeBase64(serialised) },
-      ...uploads.map((upload) => ({
+      ...usedUploads.map((upload) => ({
         path: upload.repoPath,
         base64: upload.base64,
       })),
     ];
     const imageNote =
-      uploads.length > 0
-        ? ` (+${uploads.length} image${uploads.length === 1 ? "" : "s"})`
+      usedUploads.length > 0
+        ? ` (+${usedUploads.length} image${usedUploads.length === 1 ? "" : "s"})`
         : "";
     const message = `Update site content via admin${imageNote}`;
 
@@ -387,9 +433,10 @@ export default function AdminPage() {
 
   if (phase === "loading") {
     return (
-      <div className="a-shell">
-        <div className="a-login">
-          <p>Loading…</p>
+      <div className="a-shell a-center">
+        <div className="a-loading">
+          <span className="a-spinner" aria-hidden="true" />
+          <p>Opening the editor…</p>
         </div>
       </div>
     );
@@ -401,14 +448,17 @@ export default function AdminPage() {
 
   if (phase === "denied") {
     return (
-      <div className="a-shell">
-        <div className="a-login">
-          <h1>No access</h1>
+      <div className="a-shell a-center">
+        <div className="a-login-card">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="a-login-logo" src="/assets/logo.png" alt="" />
+          <h1>This account can&apos;t edit the site</h1>
           <p>
-            You are signed in as <strong>{identity?.email}</strong>, but that
-            account is not on the list of editors for this site.
+            You are signed in as <strong>{identity?.email}</strong>, which isn&apos;t on
+            the list of editors. Sign out and use an approved account, or ask the
+            site owner to add this one.
           </p>
-          <button type="button" className="a-btn" onClick={signOut}>
+          <button type="button" className="a-btn a-btn-primary" onClick={signOut}>
             Sign out
           </button>
         </div>
@@ -416,313 +466,428 @@ export default function AdminPage() {
     );
   }
 
-  const pendingBytes = uploads.reduce((sum, upload) => sum + upload.bytes, 0);
+  const pendingBytes = usedUploads.reduce((sum, upload) => sum + upload.bytes, 0);
+  const current = AREAS.find((a) => a.id === area) ?? AREAS[0];
+  const previewFocus =
+    area === "sections" && content.sections[0] ? `#${content.sections[0].id}` : current.focus;
+  const changed = isDirty || hasUploads;
+
+  // One status line: errors and results win, then publishing, then whether
+  // there's unpublished work.
+  // `short` is what fits on a phone.
+  const pill = publishing
+    ? { tone: "idle", text: "Publishing…", short: "Publishing…" }
+    : status.tone === "err"
+      ? { tone: "err", text: status.message, short: "Something went wrong" }
+      : status.tone === "ok"
+        ? { tone: "ok", text: status.message, short: "Published" }
+        : changed
+          ? { tone: "dirty", text: "Unpublished changes, saved in this browser", short: "Not published yet" }
+          : { tone: "ok", text: "Everything is published", short: "Published" };
 
   return (
     <UploadProvider value={uploadApi}>
-      <div className="a-shell">
-        <div className="a-topbar">
+      <div className="a-shell a-app">
+        <header className="a-topbar">
           <span className="a-brand">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/assets/logo.png" alt="" />
-            Sync content editor
+            <span>
+              Sync <span className="a-brand-sub">editor</span>
+            </span>
+          </span>
+
+          <span className={`a-pill a-pill-${pill.tone}`} data-tour="status" role="status">
+            <span className="a-pill-dot" aria-hidden="true" />
+            <span className="a-hide-sm">{pill.text}</span>
+            <span className="a-show-sm-inline">{pill.short}</span>
           </span>
 
           <span className="a-spacer" />
 
-          {status.message && (
-            <span className={`a-status a-status-${status.tone}`}>
-              {status.message}
-            </span>
-          )}
-
-          {isDirty && !status.message && (
-            <span className="a-status a-status-dirty">Unpublished changes</span>
+          {changed && !publishing && (
+            <button type="button" className="a-btn a-btn-quiet a-hide-sm" onClick={discard}>
+              Undo changes
+            </button>
           )}
 
           <button
             type="button"
-            className="a-btn a-btn-quiet a-mobile-toggle"
-            onClick={() =>
-              setMobileView((view) => (view === "editor" ? "preview" : "editor"))
-            }
+            className="a-btn a-btn-quiet a-btn-icon"
+            onClick={() => setHelpOpen(true)}
+            data-tour="help"
+            aria-label="Help"
           >
-            {mobileView === "editor" ? "Preview" : "Edit"}
-          </button>
-
-          <button
-            type="button"
-            className="a-btn a-btn-quiet"
-            onClick={discard}
-            disabled={!isDirty && !hasUploads}
-          >
-            Discard
+            <span aria-hidden="true">?</span>
+            <span className="a-hide-sm">Help</span>
           </button>
 
           <button
             type="button"
             className="a-btn a-btn-primary"
             onClick={() => void publish()}
-            disabled={publishing || (!isDirty && !hasUploads)}
+            disabled={publishing || !changed}
+            data-tour="publish"
+            title={changed ? "Put your changes on the live site" : "Nothing new to publish"}
           >
             {publishing ? "Publishing…" : "Publish"}
           </button>
 
           {identity && (
-            <span className="a-user">
-              {identity.picture && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={identity.picture} alt="" referrerPolicy="no-referrer" />
-              )}
-              {identity.name}
+            <div className="a-account">
               <button
                 type="button"
-                className="a-icon-btn"
-                title="Sign out"
-                onClick={signOut}
+                className="a-avatar"
+                onClick={() => setMenuOpen((value) => !value)}
+                aria-expanded={menuOpen}
+                aria-label="Account"
               >
-                ⏻
+                {identity.picture ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={identity.picture} alt="" referrerPolicy="no-referrer" />
+                ) : (
+                  (identity.name || identity.email).slice(0, 1).toUpperCase()
+                )}
               </button>
-            </span>
+              {menuOpen && (
+                <div className="a-menu" role="menu">
+                  <p className="a-menu-who">
+                    <strong>{identity.name}</strong>
+                    <span>{identity.email}</span>
+                  </p>
+                  {changed && (
+                    <button type="button" role="menuitem" className="a-menu-item a-show-sm" onClick={discard}>
+                      Undo changes
+                    </button>
+                  )}
+                  <a role="menuitem" className="a-menu-item" href="/" target="_blank" rel="noopener noreferrer">
+                    Open the live site ↗
+                  </a>
+                  <button type="button" role="menuitem" className="a-menu-item" onClick={signOut}>
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
           )}
-        </div>
+        </header>
 
         {hasUploads && (
           <div className="a-banner">
-            {uploads.length} new image{uploads.length === 1 ? "" : "s"} (
-            {formatBytes(pendingBytes)}) will be committed when you publish.
+            {usedUploads.length} new photo{usedUploads.length === 1 ? "" : "s"} ({formatBytes(pendingBytes)})
+            will be uploaded when you publish.
           </div>
         )}
 
-        <div className="a-layout" data-mobile-view={mobileView}>
-          <div className="a-editor-pane">
-            <h2 className="a-section-title">Header</h2>
-            <SectionEditor
-              section={content.hero}
-              previews={previews}
-              onChange={(hero) =>
-                mutate((draft) => {
-                  draft.hero = hero as SiteContent["hero"];
-                })
-              }
-            />
-
-            <h2 className="a-section-title">Page sections</h2>
-            {content.sections.map((section, index) => (
-              <SectionEditor
-                key={section.id}
-                section={section}
-                previews={previews}
-                onChange={(updated) => replaceSection(index, updated)}
-                controls={{
-                  onMoveUp: () => moveSection(index, -1),
-                  onMoveDown: () => moveSection(index, 1),
-                  onDelete: () => deleteSection(index),
-                  onDuplicate: () => duplicateSection(index),
-                  canMoveUp: index > 0,
-                  canMoveDown: index < content.sections.length - 1,
+        <div className="a-workspace" data-mobile-view={mobileView}>
+          <nav className="a-rail" aria-label="Editor areas" data-tour="rail">
+            {AREAS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`a-rail-item ${area === item.id ? "is-active" : ""}`}
+                aria-current={area === item.id ? "page" : undefined}
+                onClick={() => {
+                  setArea(item.id);
+                  setMobileView("editor");
                 }}
-              />
+              >
+                <AreaIcon id={item.id} />
+                <span>{item.label}</span>
+              </button>
             ))}
+          </nav>
 
-            <div className="a-subsection-head" style={{ marginTop: "0.9rem" }}>
-              <span className="a-label">Add a section</span>
-              <span style={{ display: "flex", gap: "0.35rem" }}>
-                <button
-                  type="button"
-                  className="a-btn a-btn-quiet a-btn-sm"
-                  onClick={() => addSection("feature")}
-                >
-                  + Wide card
-                </button>
-                <button
-                  type="button"
-                  className="a-btn a-btn-quiet a-btn-sm"
-                  onClick={() => addSection("trio")}
-                >
-                  + Three cards
-                </button>
-                <button
-                  type="button"
-                  className="a-btn a-btn-quiet a-btn-sm"
-                  onClick={() => addSection("gallery")}
-                >
-                  + Gallery
-                </button>
-                <button
-                  type="button"
-                  className="a-btn a-btn-quiet a-btn-sm"
-                  onClick={() => addSection("cta")}
-                >
-                  + Call to action
-                </button>
-              </span>
+          <main className="a-panel" data-tour="panel">
+            <div className="a-panel-head">
+              <h1>{current.label}</h1>
+              <p>{current.hint}</p>
             </div>
 
-            <h2 className="a-section-title">Club info</h2>
-            <div className="a-card">
-              <div className="a-card-body">
-                <InfoEditor
-                  info={content.info ?? emptyClubInfo()}
-                  onChange={(info) =>
-                    mutate((draft) => {
-                      draft.info = info;
-                    })
-                  }
-                />
-              </div>
-            </div>
+            {area === "header" && (
+              <SectionEditor
+                section={content.hero}
+                previews={previews}
+                defaultOpen
+                onChange={(hero) =>
+                  mutate((draft) => {
+                    draft.hero = hero as SiteContent["hero"];
+                  })
+                }
+              />
+            )}
 
-            <h2 className="a-section-title">Contact links</h2>
-            <div className="a-card">
-              <div className="a-card-body">
-                {content.socials.map((social, index) => (
-                  <div key={social.id} className="a-nested">
-                    <div className="a-nested-head">
-                      <strong>{social.icon}</strong>
-                    </div>
-                    <TextField
-                      label="Link"
-                      value={social.href}
-                      onChange={(href) =>
-                        mutate((draft) => {
-                          draft.socials[index].href = href;
-                        })
-                      }
-                    />
-                    <TextField
-                      label="Accessible label"
-                      value={social.label}
-                      onChange={(label) =>
-                        mutate((draft) => {
-                          draft.socials[index].label = label;
-                        })
-                      }
-                    />
-                  </div>
+            {area === "sections" && (
+              <>
+                {content.sections.map((section, index) => (
+                  <SectionEditor
+                    key={section.id}
+                    section={section}
+                    previews={previews}
+                    onChange={(updated) => replaceSection(index, updated)}
+                    controls={{
+                      onMoveUp: () => moveSection(index, -1),
+                      onMoveDown: () => moveSection(index, 1),
+                      onDelete: () => deleteSection(index),
+                      onDuplicate: () => duplicateSection(index),
+                      canMoveUp: index > 0,
+                      canMoveDown: index < content.sections.length - 1,
+                    }}
+                  />
                 ))}
-              </div>
-            </div>
 
-            <h2 className="a-section-title">Footer</h2>
-            <div className="a-card">
-              <div className="a-card-body">
-                <TextField
-                  label="Copyright line"
-                  value={content.footer.copyright}
-                  onChange={(copyright) =>
-                    mutate((draft) => {
-                      draft.footer.copyright = copyright;
-                    })
-                  }
-                />
-                <TextField
-                  label="Credit prefix"
-                  value={content.footer.creditPrefix}
-                  onChange={(creditPrefix) =>
-                    mutate((draft) => {
-                      draft.footer.creditPrefix = creditPrefix;
-                    })
-                  }
-                />
-                <TextField
-                  label="Credit name"
-                  value={content.footer.creditName}
-                  onChange={(creditName) =>
-                    mutate((draft) => {
-                      draft.footer.creditName = creditName;
-                    })
-                  }
-                />
-                <TextField
-                  label="Credit link"
-                  value={content.footer.creditHref}
-                  onChange={(creditHref) =>
-                    mutate((draft) => {
-                      draft.footer.creditHref = creditHref;
-                    })
-                  }
-                />
-              </div>
-            </div>
+                <h2 className="a-section-title">Add a section</h2>
+                <div className="a-add-grid">
+                  {NEW_SECTIONS.map((item) => (
+                    <button key={item.type} type="button" className="a-add-card" onClick={() => addSection(item.type)}>
+                      <strong>+ {item.label}</strong>
+                      <span>{item.hint}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="a-hint">New sections are added at the end of the page. Use the arrows to move them.</p>
+              </>
+            )}
 
-            <h2 className="a-section-title">Effects</h2>
-            <div className="a-card">
-              <div className="a-card-body">
-                <CheckboxField
-                  label="Use the custom lime cursor (desktop only)"
-                  checked={content.cursor.enabled}
-                  onChange={(enabled) =>
-                    mutate((draft) => {
-                      draft.cursor.enabled = enabled;
-                    })
-                  }
-                />
-              </div>
-            </div>
-
-            <h2 className="a-section-title">Festival theme</h2>
-            <div className="a-card">
-              <div className="a-card-body">
-                <SelectField
-                  label="Theme"
-                  value={activeTheme(content).name}
-                  options={THEME_NAMES.map((name) => ({
-                    value: name,
-                    label: THEMES[name].label,
-                  }))}
-                  onChange={(name) =>
-                    mutate((draft) => {
-                      draft.theme = { name, message: draft.theme?.message ?? "" };
-                      delete draft.snow;
-                    })
-                  }
-                />
-                {activeTheme(content).name !== "none" && (
-                  <TextField
-                    label="Banner message"
-                    value={content.theme?.message ?? ""}
-                    hint={`Leave empty for: “${THEMES[activeTheme(content).name].defaultMessage}”`}
-                    onChange={(message) =>
+            {area === "info" && (
+              <div className="a-card">
+                <div className="a-card-body">
+                  <InfoEditor
+                    info={content.info ?? emptyClubInfo()}
+                    onChange={(info) =>
                       mutate((draft) => {
-                        draft.theme = {
-                          name: activeTheme(draft).name,
-                          message,
-                        };
+                        draft.info = info;
+                      })
+                    }
+                  />
+                </div>
+              </div>
+            )}
+
+            {area === "festival" && (
+              <div className="a-card">
+                <div className="a-card-body">
+                  <SelectField
+                    label="Theme"
+                    value={activeTheme(content).name}
+                    options={THEME_NAMES.map((name) => ({ value: name, label: THEMES[name].label }))}
+                    onChange={(name) =>
+                      mutate((draft) => {
+                        draft.theme = { name, message: draft.theme?.message ?? "" };
                         delete draft.snow;
                       })
                     }
                   />
-                )}
-                <p className="a-hint">
-                  Dresses the whole site for the occasion: falling snow,
-                  confetti, sparks or colours, decorations on the cards, a
-                  banner at the top and an outfit for the penguin.
-                </p>
+                  {activeTheme(content).name !== "none" && (
+                    <TextField
+                      label="Banner message"
+                      value={content.theme?.message ?? ""}
+                      hint={`Leave empty to use: “${THEMES[activeTheme(content).name].defaultMessage}”`}
+                      onChange={(message) =>
+                        mutate((draft) => {
+                          draft.theme = { name: activeTheme(draft).name, message };
+                          delete draft.snow;
+                        })
+                      }
+                    />
+                  )}
+                  <p className="a-hint">
+                    Changes the falling effect, the decorations, the banner at the top and
+                    the penguin&apos;s outfit. Set it back to None when the festival is over.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {area === "contact" && (
+              <>
+                <div className="a-card">
+                  <div className="a-card-body">
+                    {content.socials.map((social, index) => (
+                      <div key={social.id} className="a-nested">
+                        <div className="a-nested-head">
+                          <strong>{SOCIAL_NAMES[social.icon] ?? social.icon}</strong>
+                        </div>
+                        <TextField
+                          label="Link"
+                          value={social.href}
+                          hint={SOCIAL_HINTS[social.icon]}
+                          onChange={(href) =>
+                            mutate((draft) => {
+                              draft.socials[index].href = href;
+                            })
+                          }
+                        />
+                        <TextField
+                          label="Description for screen readers"
+                          value={social.label}
+                          onChange={(label) =>
+                            mutate((draft) => {
+                              draft.socials[index].label = label;
+                            })
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <h2 className="a-section-title">Footer</h2>
+                <div className="a-card">
+                  <div className="a-card-body">
+                    <TextField
+                      label="Copyright line"
+                      value={content.footer.copyright}
+                      onChange={(copyright) =>
+                        mutate((draft) => {
+                          draft.footer.copyright = copyright;
+                        })
+                      }
+                    />
+                    <TextField
+                      label="Credit text"
+                      value={content.footer.creditPrefix}
+                      onChange={(creditPrefix) =>
+                        mutate((draft) => {
+                          draft.footer.creditPrefix = creditPrefix;
+                        })
+                      }
+                    />
+                    <TextField
+                      label="Credit name"
+                      value={content.footer.creditName}
+                      onChange={(creditName) =>
+                        mutate((draft) => {
+                          draft.footer.creditName = creditName;
+                        })
+                      }
+                    />
+                    <TextField
+                      label="Credit link"
+                      value={content.footer.creditHref}
+                      onChange={(creditHref) =>
+                        mutate((draft) => {
+                          draft.footer.creditHref = creditHref;
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {area === "settings" && (
+              <>
+                <div className="a-card">
+                  <div className="a-card-body">
+                    <CheckboxField
+                      label="Use the custom lime cursor on computers"
+                      checked={content.cursor.enabled}
+                      onChange={(enabled) =>
+                        mutate((draft) => {
+                          draft.cursor.enabled = enabled;
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="a-card a-card-plain">
+                  <div className="a-card-body">
+                    <p className="a-hint">
+                      Publishing saves to the <code>{siteConfig.repo.branch}</code> branch on
+                      GitHub, which rebuilds the live site in about a minute.
+                    </p>
+                    <a className="a-btn a-btn-quiet a-btn-sm" href={actionsUrl()} target="_blank" rel="noopener noreferrer">
+                      Watch the site update ↗
+                    </a>
+                  </div>
+                </div>
+              </>
+            )}
+          </main>
+
+          <section className="a-preview" aria-label="Live preview" data-tour="preview">
+            <div className="a-preview-bar">
+              <span className="a-preview-label">Live preview</span>
+              <div className="a-segmented" role="group" aria-label="Preview size">
+                {(["desktop", "phone"] as const).map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    className={device === d ? "is-active" : ""}
+                    aria-pressed={device === d}
+                    onClick={() => setDevice(d)}
+                  >
+                    {d === "desktop" ? "Desktop" : "Phone"}
+                  </button>
+                ))}
               </div>
             </div>
-
-            <p className="a-hint" style={{ marginTop: "1.5rem" }}>
-              Publishing commits to the <code>{siteConfig.repo.branch}</code>{" "}
-              branch and triggers a rebuild.{" "}
-              <a
-                href={actionsUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "#d7afff" }}
-              >
-                Watch the deploy →
-              </a>
-            </p>
-          </div>
-
-          <div className="a-preview-pane">
-            <div className="a-preview-note">Live preview</div>
-            <SiteRenderer content={previewContent} />
-          </div>
+            <PreviewFrame content={previewContent} device={device} focus={previewFocus} />
+          </section>
         </div>
+
+        {/* Phones: switch between editing and the preview. */}
+        <div className="a-mobile-switch a-segmented" role="group" aria-label="Show">
+          {(["editor", "preview"] as const).map((view) => (
+            <button
+              key={view}
+              type="button"
+              className={mobileView === view ? "is-active" : ""}
+              aria-pressed={mobileView === view}
+              onClick={() => {
+                setMobileView(view);
+                if (view === "preview") setDevice("phone");
+              }}
+            >
+              {view === "editor" ? "Edit" : "Preview"}
+            </button>
+          ))}
+        </div>
+
+        <AdminHelp
+          open={helpOpen}
+          onClose={() => setHelpOpen(false)}
+          onStartTour={() => {
+            setHelpOpen(false);
+            setMobileView("editor");
+            setTourOpen(true);
+          }}
+        />
+        <AdminTour open={tourOpen} onClose={() => setTourOpen(false)} />
       </div>
     </UploadProvider>
+  );
+}
+
+const SOCIAL_NAMES: Record<string, string> = {
+  phone: "Phone",
+  instagram: "Instagram",
+  envelope: "Email",
+  location: "Map location",
+};
+
+const SOCIAL_HINTS: Record<string, string> = {
+  phone: "Start with tel: and the number, like tel:+919203636803",
+  envelope: "Start with mailto: and the address",
+  instagram: "Your Instagram profile link",
+  location: "A Google Maps share link",
+};
+
+/** Small line icons for the editor's menu. */
+function AreaIcon({ id }: { id: AreaId }) {
+  const paths: Record<AreaId, React.ReactNode> = {
+    header: <path d="M4 5h16v6H4zM4 15h10M4 19h7" />,
+    sections: <path d="M4 4h16v5H4zM4 12h7v8H4zM14 12h6v8h-6z" />,
+    info: <path d="M12 8h.01M11 12h1v5h1M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z" />,
+    festival: <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM18 16l.8 2.2L21 19l-2.2.8L18 22l-.8-2.2L15 19l2.2-.8z" />,
+    contact: <path d="M4 6h16v12H4zM4 7l8 6 8-6" />,
+    settings: <path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM19 12l2-1-1-3-2 .3-1.5-1.5L16.8 4l-3-1-1 2h-1.6l-1-2-3 1 .3 2.3L6 7.8 4 7.5 3 10.5l2 1v1.6l-2 1 1 3 2.3-.3 1.5 1.5L7.5 20l3 1 1-2h1.6l1 2 3-1-.3-2.3 1.5-1.5 2.2.3 1-3-2-1z" />,
+  };
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {paths[id]}
+    </svg>
   );
 }
 
@@ -738,49 +903,51 @@ function LoginScreen({
   const configured = isGoogleConfigured();
 
   return (
-    <div className="a-shell">
-      <div className="a-login">
+    <div className="a-shell a-login-page">
+      <div className="a-login-art" aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="a-login-logo" src="/assets/logo.png" alt="" />
-        <h1>Sync content editor</h1>
+        <img src="/assets/venue/courts-night.webp" alt="" />
+        <div className="a-login-art-text">
+          <p>Sync Pickleball Club &amp; Café</p>
+          <h2>Keep the site as lively as the courts.</h2>
+        </div>
+      </div>
 
-        {configured ? (
-          <>
-            <p>Sign in with an authorised Google account to edit the site.</p>
-            {status.message && (
-              <p className={`a-status a-status-${status.tone}`}>
-                {status.message}
-              </p>
-            )}
-            <GoogleSignInButton onToken={onToken} />
-          </>
-        ) : (
-          <>
-            <p>The editor is not connected to Google Sign-In yet.</p>
-            <div className="a-setup">
-              <strong>One-time setup</strong>
-              <ol style={{ paddingLeft: "1.1rem", margin: "0.5rem 0 0" }}>
-                <li>
-                  Create a Google OAuth Web client id with this site as an
-                  authorised JavaScript origin
-                </li>
-                <li>
-                  Deploy <code>oauth-worker/</code> to Cloudflare and set{" "}
-                  <code>GITHUB_TOKEN</code>
-                </li>
-                <li>
-                  Add <code>GOOGLE_CLIENT_ID</code>, <code>PUBLISH_URL</code> and{" "}
-                  <code>ADMIN_EMAILS</code> as repository variables, then re-run
-                  the deploy workflow
-                </li>
-              </ol>
-              <p style={{ margin: "0.6rem 0 0" }}>
-                Full instructions are in the repository&rsquo;s{" "}
-                <code>README.md</code>.
-              </p>
-            </div>
-          </>
-        )}
+      <div className="a-login-side">
+        <div className="a-login-card">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="a-login-logo" src="/assets/logo.png" alt="" />
+          <h1>Sync site editor</h1>
+
+          {configured ? (
+            <>
+              <p>Sign in with an approved Google account to change text, photos and more.</p>
+              {status.message && <p className={`a-pill a-pill-${status.tone}`}>{status.message}</p>}
+              <GoogleSignInButton onToken={onToken} />
+              <details className="a-login-help">
+                <summary>Trouble signing in?</summary>
+                <p>
+                  Only approved accounts can sign in. If the Google button shows an
+                  error, this web address isn&apos;t allowed in the club&apos;s Google Cloud
+                  settings yet. The editor at <strong>cms.syncpickleball.com/admin</strong> always works.
+                </p>
+              </details>
+            </>
+          ) : (
+            <>
+              <p>The editor isn&apos;t connected to Google Sign-In on this copy of the site.</p>
+              <div className="a-setup">
+                <strong>For the site owner</strong>
+                <ol>
+                  <li>Copy <code>.env.local.example</code> to <code>.env.local</code> and fill in the three values.</li>
+                  <li>Restart <code>npm run dev</code>.</li>
+                  <li>Make sure this address is an authorised JavaScript origin in Google Cloud.</li>
+                </ol>
+                <p>The full steps are in the repository&rsquo;s <code>README.md</code>.</p>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -201,7 +201,9 @@ export function ImageField({
           <input
             ref={inputRef}
             type="file"
-            accept="image/*"
+            // Listing formats (rather than image/*) makes iPhones convert
+            // HEIC photos to JPEG as they're picked.
+            accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,image/avif"
             hidden
             onChange={(event) => void handleFile(event.target.files?.[0])}
           />

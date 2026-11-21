@@ -4,7 +4,7 @@
     "id": "hero",
     "type": "hero",
     "logo": {
-      "src": "/uploads/hero_image.png",
+      "src": "/uploads/hero_image.webp",
       "alt": "Sync logo"
     },
     "background": {
