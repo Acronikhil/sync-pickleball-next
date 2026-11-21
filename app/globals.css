@@ -259,6 +259,58 @@ body {
     55% { transform: translateY(-12px) scaleY(1.04); }
   }
 
+  /* FooterPenguin: hidden behind its perch until the footer scrolls in,
+     then pops up. A slight lean on hover, a speech bubble that pops, and a
+     ball that arcs up and away. */
+  .footer-penguin-body {
+    transform: translateY(45%) scale(0.85);
+    opacity: 0;
+    transition:
+      transform 0.7s cubic-bezier(0.3, 1.6, 0.5, 1),
+      opacity 0.3s;
+  }
+
+  .footer-penguin.is-arrived .footer-penguin-body {
+    transform: none;
+    opacity: 1;
+  }
+
+  .footer-penguin.is-arrived:hover .footer-penguin-body {
+    transform: rotate(-6deg);
+    transition-duration: 0.3s;
+  }
+
+  .footer-penguin-line {
+    transform-origin: bottom right;
+    animation: penguin-line 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+
+  @keyframes penguin-line {
+    from {
+      transform: scale(0.4) translateY(10px);
+      opacity: 0;
+    }
+  }
+
+  .footer-penguin-ball {
+    pointer-events: none;
+    animation: penguin-toss 1.2s cubic-bezier(0.3, 0.6, 0.6, 1) forwards;
+  }
+
+  @keyframes penguin-toss {
+    0% { transform: translate(0, 0) scale(0.5) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    45% { transform: translate(-160%, -420%) scale(1) rotate(200deg); }
+    100% { transform: translate(-380%, 120%) scale(0.9) rotate(520deg); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .footer-penguin-body {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
   /* StringLights bulbs: glow in their own colour, twinkling out of step. */
   .string-bulb {
     filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 10px currentColor);

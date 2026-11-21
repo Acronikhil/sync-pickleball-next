@@ -29,6 +29,23 @@ export function PenguinBuddy({
   theme?: ThemeSpec;
 }) {
   const [visible, setVisible] = useState(false);
+  // The footer has its own penguin; this one steps aside while that one is
+  // on screen, so there is only ever one penguin in view.
+  const [footerInView, setFooterInView] = useState(false);
+
+  useEffect(() => {
+    const footerPenguin = document.querySelector("[data-footer-penguin]");
+    if (!footerPenguin) return;
+    const observer = new IntersectionObserver(([entry]) => setFooterInView(entry.isIntersecting), {
+      threshold: 0.2,
+    });
+    observer.observe(footerPenguin);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (footerInView) setOpen(false);
+  }, [footerInView]);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -74,6 +91,9 @@ export function PenguinBuddy({
 
   if (!book?.href) return null;
 
+  // Never show the bubble while the footer penguin is the one on screen.
+  const bubbleOpen = open && !footerInView;
+
   const dismiss = () => setOpen(false);
 
   return (
@@ -81,13 +101,13 @@ export function PenguinBuddy({
       // Click-through: the box is sized for the speech bubble even while it's
       // hidden, and would otherwise block whatever is underneath it.
       className={`pointer-events-none fixed bottom-0 right-0 z-40 flex items-end gap-2 transition-transform duration-500 ease-[cubic-bezier(.2,.9,.3,1.3)] md:right-6 ${
-        visible ? "translate-y-0" : "translate-y-[110%]"
+        visible && !footerInView ? "translate-y-0" : "translate-y-[110%]"
       }`}
     >
       <div
         role="status"
         className={`mb-16 max-w-64 origin-bottom-right rounded-2xl font-sans rounded-br-sm bg-cream p-4 text-night shadow-2xl shadow-night/50 transition-all duration-300 ${
-          open ? "pointer-events-auto scale-100 opacity-100" : "scale-75 opacity-0"
+          bubbleOpen ? "pointer-events-auto scale-100 opacity-100" : "scale-75 opacity-0"
         }`}
       >
         <p className="font-display text-base font-bold leading-tight">Hi, I&apos;m {name}! Courts fill up fast.</p>
@@ -97,7 +117,7 @@ export function PenguinBuddy({
             href={book.href}
             {...(book.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
             className="inline-flex items-center gap-2 rounded-full bg-night px-4 py-2 text-sm font-semibold text-lime no-underline"
-            tabIndex={open ? 0 : -1}
+            tabIndex={bubbleOpen ? 0 : -1}
           >
             Book a court <Icon name="arrow-right" className="size-4" />
           </a>
@@ -105,7 +125,7 @@ export function PenguinBuddy({
             type="button"
             onClick={dismiss}
             className="cursor-pointer rounded-full border-0 bg-transparent px-3 py-2 font-sans text-sm text-night/60 hover:text-night"
-            tabIndex={open ? 0 : -1}
+            tabIndex={bubbleOpen ? 0 : -1}
           >
             Not now
           </button>
@@ -115,17 +135,17 @@ export function PenguinBuddy({
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        aria-expanded={open}
-        aria-label={open ? `Close ${name}'s message` : `Say hi to ${name} the penguin`}
+        aria-expanded={bubbleOpen}
+        aria-label={bubbleOpen ? `Close ${name}'s message` : `Say hi to ${name} the penguin`}
         className={`group pointer-events-auto relative -mb-3 w-16 shrink-0 cursor-pointer border-0 bg-transparent p-0 transition-transform duration-500 md:w-24 ${
           // On phones it peeks in from the edge while closed, so it never
           // sits on top of a button.
-          open ? "" : "max-md:translate-x-[35%]"
+          bubbleOpen ? "" : "max-md:translate-x-[35%]"
         }`}
       >
         {theme.mounds && <SnowCap seed={9} shape="mound" className="absolute -inset-x-4 bottom-0 z-10 h-7" />}
         <Penguin
-          pose={open ? "cheer" : "wave"}
+          pose={bubbleOpen ? "cheer" : "wave"}
           outfit={theme.outfit}
           className="w-full drop-shadow-[0_10px_20px_rgb(13_8_32/0.6)] transition-transform duration-300 group-hover:-translate-y-1"
         />

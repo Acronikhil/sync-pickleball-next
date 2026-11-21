@@ -1,4 +1,4 @@
-import type { BodySection, SiteContent } from "@/lib/content";
+import { mascotName, type BodySection, type SiteContent } from "@/lib/content";
 import { Hero } from "./sections/Hero";
 import { Marquee } from "./sections/Marquee";
 import { Feature } from "./sections/Feature";
@@ -104,7 +104,13 @@ export function SiteRenderer({ content }: { content: SiteContent }) {
         <ShotPicker shots={shots} theme={theme} />
         {withInfo(sections.map(renderSection))}
       </main>
-      <SiteFooter socials={content.socials} footer={content.footer} logo={hero.logo} theme={theme} />
+      <SiteFooter
+        socials={content.socials}
+        footer={content.footer}
+        logo={hero.logo}
+        theme={theme}
+        mascotName={mascotName(content)}
+      />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import type { FooterContent, ImageRef, SocialLink } from "@/lib/content";
 import { FlowText } from "./FlowText";
 import { Icon } from "./Icon";
-import { Penguin } from "./Penguin";
+import { FooterPenguin } from "./FooterPenguin";
 import { SnowCap } from "./SnowCap";
 import { THEMES, type ThemeSpec } from "@/lib/themes";
 
@@ -69,11 +69,14 @@ export function SiteFooter({
   footer,
   logo,
   theme = THEMES.none,
+  mascotName = "Dinky",
 }: {
   socials: SocialLink[];
   footer: FooterContent;
   logo: ImageRef;
   theme?: ThemeSpec;
+  /** The penguin's name, set in the editor. */
+  mascotName?: string;
 }) {
   return (
     <footer id="visit" className="scroll-mt-24 overflow-hidden px-4 pt-16 sm:px-6">
@@ -120,11 +123,17 @@ export function SiteFooter({
         </div>
       </div>
 
-      <div className="relative mx-auto mt-24 mb-6 w-full max-w-7xl">
+      {/* Sized so the wordmark and the penguin on it fit on one screen when
+          you reach the bottom, on laptops as well as big monitors. */}
+      <div className="relative mx-auto mt-16 mb-8 w-full max-w-[min(56rem,calc((100svh-10rem)*1.5))]">
         <FlowText text="sync" strokeWidth={0.8} className="pointer-events-none w-full select-none" />
         {/* The penguin, perched on the "c": the top of the lowercase letters
             sits ~38% down the wordmark at every width, as it scales as one. */}
-        <Penguin pose="idle" outfit={theme.outfit} className="absolute right-[7%] top-[38%] w-[13%] -translate-y-[93%]" />
+        <FooterPenguin
+          name={mascotName}
+          outfit={theme.outfit}
+          className="absolute right-[7%] top-[38%] w-[13%] -translate-y-[93%]"
+        />
         {theme.mounds && (
           // A little mound on top of the "c", in front of the penguin's feet.
           <SnowCap seed={5} shape="mound" className="absolute right-[4.5%] top-[38%] h-[7%] w-[18%] -translate-y-[78%]" />
