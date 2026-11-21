@@ -7,13 +7,13 @@ import { Penguin } from "./Penguin";
 import { SnowCap } from "./SnowCap";
 import { THEMES, type ThemeSpec } from "@/lib/themes";
 
-const DISMISS_KEY = "sync-penguin-dismissed";
+const GREETED_KEY = "sync-penguin-greeted";
 
 /**
- * The penguin pops up from the bottom-right corner once you've scrolled past
- * the header, says hello once, and from then on offers a quick way to book
- * when tapped. It ducks out of the way at the footer (which has its own
- * penguin), and stays gone for the session if closed.
+ * The penguin lives in the bottom-right corner the whole time you're on the
+ * page (its eyes follow your cursor — see PenguinGaze). On wider screens it
+ * says hello once per visit; after that, tapping it offers a quick way to
+ * book. "Not now" just closes the bubble.
  *
  * Public page only: mounted from app/page.tsx, never in the admin preview,
  * where a fixed element would float over the editor.
@@ -27,39 +27,32 @@ export function PenguinBuddy({
 }) {
   const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
-  const [dismissed, setDismissed] = useState(true);
-  const [greeted, setGreeted] = useState(false);
 
   useEffect(() => {
+    // Waddle in just after the page settles.
+    const show = window.setTimeout(() => setVisible(true), 700);
+
+    // Say hello once per visit, on wider screens only — on a phone the
+    // bubble would cover what you're reading, so it waits for a tap.
+    let greeted = false;
     try {
-      setDismissed(sessionStorage.getItem(DISMISS_KEY) === "1");
-    } catch {
-      setDismissed(false);
-    }
+      greeted = sessionStorage.getItem(GREETED_KEY) === "1";
+    } catch {}
+    const hello =
+      !greeted && window.matchMedia("(min-width: 768px)").matches
+        ? window.setTimeout(() => {
+            setOpen(true);
+            try {
+              sessionStorage.setItem(GREETED_KEY, "1");
+            } catch {}
+          }, 5000)
+        : 0;
 
-    const footer = document.querySelector("#visit");
-    const court = document.querySelector("#play [data-cursor-hide]");
-    const onScroll = () => {
-      const vh = window.innerHeight;
-      const pastHero = window.scrollY > vh * 0.8;
-      const atFooter = footer ? footer.getBoundingClientRect().top < vh * 0.85 : false;
-      // The court has its own umpire penguin; don't show two at once.
-      const courtBox = court?.getBoundingClientRect();
-      const atCourt = courtBox ? courtBox.top < vh && courtBox.bottom > 0 : false;
-      setVisible(pastHero && !atFooter && !atCourt);
+    return () => {
+      window.clearTimeout(show);
+      window.clearTimeout(hello);
     };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  // Say hello once, the first time it appears — on wider screens only; on a
-  // phone the bubble would cover what you're reading, so it waits for a tap.
-  useEffect(() => {
-    if (!visible || greeted) return;
-    setGreeted(true);
-    if (window.matchMedia("(min-width: 768px)").matches) setOpen(true);
-  }, [visible, greeted]);
 
   useEffect(() => {
     if (!open) return;
@@ -67,23 +60,13 @@ export function PenguinBuddy({
     return () => window.clearTimeout(t);
   }, [open]);
 
-  // Tuck the bubble away whenever the penguin hides.
-  useEffect(() => {
-    if (!visible) setOpen(false);
-  }, [visible]);
+  if (!book?.href) return null;
 
-  if (dismissed || !book?.href) return null;
-
-  const dismiss = () => {
-    setDismissed(true);
-    try {
-      sessionStorage.setItem(DISMISS_KEY, "1");
-    } catch {}
-  };
+  const dismiss = () => setOpen(false);
 
   return (
     <div
-      className={`fixed bottom-0 right-3 z-40 flex items-end gap-2 transition-transform duration-500 ease-[cubic-bezier(.2,.9,.3,1.3)] md:right-6 ${
+      className={`fixed bottom-0 right-0 z-40 flex items-end gap-2 transition-transform duration-500 ease-[cubic-bezier(.2,.9,.3,1.3)] md:right-6 ${
         visible ? "translate-y-0" : "translate-y-[110%]"
       }`}
     >
@@ -120,7 +103,11 @@ export function PenguinBuddy({
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-label={open ? "Close the penguin's message" : "Ask the Sync penguin"}
-        className="group relative -mb-3 w-20 shrink-0 cursor-pointer border-0 bg-transparent p-0 md:w-24"
+        className={`group relative -mb-3 w-16 shrink-0 cursor-pointer border-0 bg-transparent p-0 transition-transform duration-500 md:w-24 ${
+          // On phones it peeks in from the edge while closed, so it never
+          // sits on top of a button.
+          open ? "" : "max-md:translate-x-[35%]"
+        }`}
       >
         {theme.mounds && <SnowCap seed={9} shape="mound" className="absolute -inset-x-4 bottom-0 z-10 h-7" />}
         <Penguin

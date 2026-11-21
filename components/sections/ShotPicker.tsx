@@ -303,12 +303,12 @@ export function ShotPicker({
     <section id="play" aria-labelledby="shot-heading" className="scroll-mt-24 px-4 pb-6 pt-24 sm:px-6 md:pt-32">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <h2 id="shot-heading" data-reveal className="font-display text-4xl font-bold tracking-tight md:text-6xl">
+          <h2 id="shot-heading" data-reveal className="font-display text-3xl font-bold tracking-tight md:text-5xl">
             Pick your <span className="font-serif font-normal italic tracking-normal text-lime">shot</span>
           </h2>
           <p data-reveal="0.1" className="max-w-xs text-mist/70">
-            <span className="hidden md:inline">Swing the paddle through a ball</span>
-            <span className="md:hidden">Tap a ball</span> — wherever it&apos;s headed, you&apos;re going too.
+            <span className="hidden md:inline">Swing the paddle through a ball.</span>
+            <span className="md:hidden">Tap a ball.</span> Wherever it&apos;s headed, you&apos;re going too.
           </p>
         </div>
 

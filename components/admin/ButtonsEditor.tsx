@@ -102,7 +102,7 @@ export function ButtonsEditor({
           <TextField
             label="Link"
             value={button.href}
-            placeholder="https://… or #section-id — leave blank for no link"
+            placeholder="https://… or #section-id (leave blank for no link)"
             hint="Use a full URL for external links, or #section-id to scroll to a section on this page."
             onChange={(href) => update(button.id, { href })}
           />

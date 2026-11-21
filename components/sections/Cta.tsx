@@ -56,7 +56,7 @@ export function Cta({
           />
         )}
 
-        <h2 className="font-display text-[clamp(3rem,9vw,7.5rem)] font-extrabold uppercase leading-[0.88] tracking-[-0.04em]">
+        <h2 className="font-display text-[clamp(2.3rem,7vw,6rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.03em]">
           <RichText value={data.heading} accentClassName="font-serif normal-case italic font-normal tracking-normal text-lime" />
         </h2>
         <p className="mx-auto mt-8 max-w-lg text-lg text-mist/85">{data.body}</p>

@@ -22,7 +22,7 @@ export function Gallery({ data }: { data: GallerySection }) {
       <div className="mx-auto flex w-full max-w-6xl shrink-0 flex-col gap-6 px-4 sm:px-6 md:flex-row md:items-end md:justify-between">
         <h2
           data-reveal
-          className="font-display text-5xl font-bold leading-[0.9] tracking-tight md:text-7xl lg:text-[clamp(3rem,8svh,4.5rem)]"
+          className="font-display text-4xl font-bold leading-[0.95] tracking-tight md:text-6xl lg:text-[clamp(2.5rem,7svh,3.75rem)]"
         >
           <RichText
             value={data.heading}

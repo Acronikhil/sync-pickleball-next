@@ -97,11 +97,11 @@ export function SiteFooter({
       <div className="relative mx-auto mt-24 mb-6 w-full max-w-7xl">
         <FlowText text="sync" strokeWidth={0.8} className="pointer-events-none w-full select-none" />
         {/* The penguin, perched on the "c": the top of the lowercase letters
-            sits ~31% down the wordmark at every width, as it scales as one. */}
-        <Penguin pose="idle" outfit={theme.outfit} className="absolute right-[7%] top-[31%] w-[13%] -translate-y-[93%]" />
+            sits ~38% down the wordmark at every width, as it scales as one. */}
+        <Penguin pose="idle" outfit={theme.outfit} className="absolute right-[7%] top-[38%] w-[13%] -translate-y-[93%]" />
         {theme.mounds && (
           // A little mound on top of the "c", in front of the penguin's feet.
-          <SnowCap seed={5} shape="mound" className="absolute right-[4.5%] top-[31%] h-[7%] w-[18%] -translate-y-[78%]" />
+          <SnowCap seed={5} shape="mound" className="absolute right-[4.5%] top-[38%] h-[7%] w-[18%] -translate-y-[78%]" />
         )}
       </div>
     </footer>

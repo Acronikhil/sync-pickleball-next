@@ -1,18 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Inter, Instrument_Serif } from "next/font/google";
+import { Instrument_Serif, Plus_Jakarta_Sans, Unbounded } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/site.config";
 import { siteContent } from "@/lib/site-content";
 
-const bricolage = Bricolage_Grotesque({
+// Headings: Unbounded — round, geometric and sporty, in step with the
+// rounded letters of the Sync logo.
+const unbounded = Unbounded({
   subsets: ["latin"],
-  variable: "--font-bricolage",
+  variable: "--font-unbounded",
   display: "swap",
 });
 
-const inter = Inter({
+// Body and UI: Plus Jakarta Sans — crisp at small sizes on dark backgrounds.
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-jakarta",
   display: "swap",
 });
 
@@ -26,7 +29,7 @@ const instrument = Instrument_Serif({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.site.url),
-  title: "Sync Pickleball – Premium Pickleball Club & Café in Indore",
+  title: "Sync Pickleball | Premium Pickleball Club & Café in Indore",
   description:
     "Join Sync Pickleball, Indore’s first premium pickleball club and café. Play on pro-grade courts, enjoy great food & drinks, and be part of our vibrant pickleball community. Book your slot today!",
   keywords: [
@@ -45,14 +48,14 @@ export const metadata: Metadata = {
   icons: { icon: "/assets/favicon_io_sync/favicon_2.ico" },
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Sync Pickleball – Club & Café, Indore",
+    title: "Sync Pickleball | Club & Café, Indore",
     description:
       "Pro-grade courts, a cutesy café and a buzzing community. Book your slot today!",
     images: ["/assets/venue/courts-night.jpg"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Sync Pickleball – Club & Café, Indore",
+    title: "Sync Pickleball | Club & Café, Indore",
     images: ["/assets/venue/courts-night.jpg"],
   },
 };
@@ -108,7 +111,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bricolage.variable} ${inter.variable} ${instrument.variable}`}
+      className={`${unbounded.variable} ${jakarta.variable} ${instrument.variable}`}
       suppressHydrationWarning
     >
       <head>

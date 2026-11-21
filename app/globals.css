@@ -24,8 +24,8 @@
   --color-lime: #d8f65a;
   --color-coral: #ff8a65;
 
-  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-unbounded), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-instrument), ui-serif, Georgia, serif;
 
   --animate-marquee: marquee 32s linear infinite;
@@ -94,7 +94,7 @@ body {
     font-family: var(--font-display);
     font-weight: 700;
     line-height: 1;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.02em;
   }
 
   .site-root :where(img) {
@@ -161,13 +161,20 @@ body {
     overflow: visible;
   }
 
+  /* Plus Jakarta rather than the display face: Unbounded draws its glyphs
+     from overlapping shapes, and an outline traces the overlaps too. */
   .flow-text text {
-    font-family: var(--font-display);
+    font-family: var(--font-sans);
     font-weight: 800;
     letter-spacing: -0.04em;
     fill: transparent;
     stroke-linecap: round;
     stroke-linejoin: round;
+  }
+
+  .flow-text .flow-text-cover {
+    fill: var(--color-night);
+    stroke: none;
   }
 
   .flow-text-base {
@@ -199,6 +206,11 @@ body {
   .penguin-eyes {
     transform-origin: 60px 49px;
     animation: penguin-blink 4.5s infinite;
+  }
+
+  .penguin-pupils {
+    transform-box: view-box;
+    transition: transform 0.18s ease-out;
   }
 
   .penguin-wing-l {
@@ -317,10 +329,11 @@ body {
     border-color 0.3s;
 }
 
+/* Over links: a lime halo around the target rather than a filled disc, so
+   the link text underneath stays readable. */
 .cursor-ring[data-mode="link"] {
-  background: #fff;
-  border-color: transparent;
-  mix-blend-mode: difference;
+  background: rgb(216 246 90 / 0.1);
+  border-color: var(--color-lime);
 }
 
 .cursor-ring[data-mode="label"] {

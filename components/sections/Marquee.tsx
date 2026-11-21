@@ -18,7 +18,7 @@ export function Marquee({ words }: { words: string[] }) {
             {run.map((word, index) => (
               <span
                 key={index}
-                className="flex items-center gap-8 pr-8 font-display text-3xl font-extrabold uppercase tracking-tight md:text-5xl"
+                className="flex items-center gap-8 pr-8 font-display text-2xl font-extrabold uppercase tracking-tight md:text-4xl"
               >
                 {word}
                 <Icon name="sparkle" className="size-6 text-court md:size-8" />

@@ -315,7 +315,7 @@ export default function AdminPage() {
       } catch (cause) {
         if (cause instanceof PublishError && cause.code === "conflict") {
           const overwrite = window.confirm(
-            "The live content changed since you opened this editor — someone " +
+            "The live content changed since you opened this editor. Someone " +
               "may have published from another device.\n\nPublish anyway and " +
               "overwrite their changes?"
           );

@@ -70,10 +70,13 @@ export function Penguin({
 
         {/* eyes */}
         <g className="penguin-eyes">
-          <circle cx="48" cy="49" r="8.5" fill="#1b1530" />
-          <circle cx="72" cy="49" r="8.5" fill="#1b1530" />
-          <circle cx="51" cy="45.5" r="3" fill="#fff" />
-          <circle cx="75" cy="45.5" r="3" fill="#fff" />
+          {/* Pupils move as one; PenguinGaze points them at the cursor. */}
+          <g className="penguin-pupils">
+            <circle cx="48" cy="49" r="8.5" fill="#1b1530" />
+            <circle cx="72" cy="49" r="8.5" fill="#1b1530" />
+            <circle cx="51" cy="45.5" r="3" fill="#fff" />
+            <circle cx="75" cy="45.5" r="3" fill="#fff" />
+          </g>
         </g>
 
         {/* cheeks and beak */}

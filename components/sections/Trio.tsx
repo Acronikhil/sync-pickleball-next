@@ -32,7 +32,7 @@ export function Trio({ data }: { data: TrioSection }) {
             </span>
 
             <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
-              <h3 className="font-display text-3xl font-bold leading-[0.95] tracking-tight md:text-4xl">
+              <h3 className="font-display text-2xl font-bold leading-[1.05] tracking-tight md:text-3xl">
                 <RichText value={card.title} />
               </h3>
               <div className="grid transition-[grid-template-rows,opacity] duration-700 lg:grid-rows-[0fr] lg:opacity-0 lg:group-hover:grid-rows-[1fr] lg:group-hover:opacity-100 lg:group-focus:grid-rows-[1fr] lg:group-focus:opacity-100">

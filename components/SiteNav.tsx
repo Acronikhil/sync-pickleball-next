@@ -25,15 +25,27 @@ export function SiteNav({
 }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [active, setActive] = useState("");
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 40);
+      // Highlight the link for whichever section sits under the nav bar.
+      let current = "";
+      for (const link of links) {
+        const target = document.querySelector(link.href);
+        if (target && target.getBoundingClientRect().top <= window.innerHeight * 0.35) {
+          current = link.href;
+        }
+      }
+      setActive(current);
+    };
     // Only the public page scrolls the window; in the admin preview the nav
-    // just stays in its transparent state.
+    // just keeps its resting look.
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [links]);
 
   useEffect(() => {
     if (!open) return;
@@ -59,10 +71,10 @@ export function SiteNav({
       <div className="px-4 pt-4 sm:px-6">
       <nav
         aria-label="Main"
-        className={`pointer-events-auto mx-auto flex max-w-6xl items-center justify-between gap-4 rounded-full py-2 pl-2 pr-2 transition-all duration-500 ${
-          scrolled || open
-            ? "border border-white/10 bg-ink/70 shadow-2xl shadow-black/30 backdrop-blur-xl"
-            : "border border-transparent"
+        // Always frosted, so the links stay legible over the hero photo;
+        // a touch more solid once the page scrolls.
+        className={`pointer-events-auto mx-auto flex max-w-6xl items-center justify-between gap-4 rounded-full border py-2 pl-2 pr-2 shadow-2xl shadow-black/30 backdrop-blur-xl transition-all duration-500 ${
+          scrolled || open ? "border-white/12 bg-ink/85" : "border-white/10 bg-night/55"
         }`}
       >
         <a href="#top" className="flex items-center gap-3" aria-label="Sync Pickleball, back to top">
@@ -73,17 +85,24 @@ export function SiteNav({
           </span>
         </a>
 
-        <ul className="hidden items-center gap-1 md:flex">
-          {links.map((link) => (
-            <li key={link.href}>
-              <a
-                href={link.href}
-                className="rounded-full px-4 py-3 text-sm font-medium text-cream/75 transition-colors hover:bg-white/10 hover:text-cream"
-              >
-                {link.label}
-              </a>
-            </li>
-          ))}
+        <ul className="hidden items-center gap-1 rounded-full border border-white/8 bg-white/[0.04] p-1 md:flex">
+          {links.map((link) => {
+            const current = active === link.href;
+            return (
+              <li key={link.href}>
+                <a
+                  href={link.href}
+                  aria-current={current ? "true" : undefined}
+                  className={`flex min-h-10 items-center gap-2 rounded-full px-4 text-[0.92rem] font-semibold tracking-tight transition-colors duration-200 hover:bg-lime hover:text-night ${
+                    current ? "bg-white/12 text-lime" : "text-cream"
+                  }`}
+                >
+                  {current && <span className="size-1.5 rounded-full bg-current" aria-hidden="true" />}
+                  {link.label}
+                </a>
+              </li>
+            );
+          })}
         </ul>
 
         <div className="flex items-center gap-2">

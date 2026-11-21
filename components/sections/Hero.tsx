@@ -43,7 +43,7 @@ export function Hero({ data }: { data: HeroSection }) {
           </p>
 
           <h1
-            className="font-display text-[clamp(3.2rem,min(11vw,14svh),9.5rem)] font-extrabold uppercase leading-[0.85] tracking-[-0.045em]"
+            className="font-display text-[clamp(2.5rem,min(8.4vw,11svh),7.4rem)] font-extrabold uppercase leading-[0.92] tracking-[-0.03em]"
             aria-label={data.heading}
           >
             {words.map((word, index) => (
@@ -94,7 +94,7 @@ export function Hero({ data }: { data: HeroSection }) {
             <defs>
               <path id="badge-circle" d="M100,100 m-82,0 a82,82 0 1,1 164,0 a82,82 0 1,1 -164,0" />
             </defs>
-            <text className="fill-current font-display text-[15px] font-semibold uppercase tracking-[0.32em]">
+            <text className="fill-current font-sans text-[14px] font-bold uppercase tracking-[0.28em]">
               <textPath href="#badge-circle">Book a court ✦ Serve ✦ Sip ✦ Repeat ✦</textPath>
             </text>
           </svg>

@@ -3,6 +3,7 @@ import { SiteRenderer } from "@/components/SiteRenderer";
 import { CustomCursor } from "@/components/CustomCursor";
 import { Motion } from "@/components/Motion";
 import { PenguinBuddy } from "@/components/PenguinBuddy";
+import { PenguinGaze } from "@/components/PenguinGaze";
 import { FestiveParticles } from "@/components/FestiveParticles";
 import { siteContent } from "@/lib/site-content";
 import { activeTheme } from "@/lib/themes";
@@ -32,6 +33,7 @@ export default function HomePage() {
         <FestiveParticles kind={theme.particles} icon={theme.toggleIcon} />
       )}
       <PenguinBuddy book={book} theme={theme} />
+      <PenguinGaze />
       <Motion />
     </div>
   );

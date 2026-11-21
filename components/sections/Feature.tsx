@@ -46,7 +46,7 @@ export function Feature({
           </div>
           <h2
             data-reveal
-            className="mt-4 font-display text-4xl font-bold leading-[0.95] tracking-tight text-cream md:text-6xl"
+            className="mt-4 font-display text-3xl font-bold leading-[1.05] tracking-tight text-cream md:text-5xl"
           >
             {data.title}
           </h2>

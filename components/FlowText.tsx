@@ -65,7 +65,7 @@ export function FlowText({
         y="0"
         fontSize="100"
         className="flow-text-base"
-        strokeWidth={strokeWidth}
+        strokeWidth={strokeWidth * 2}
       >
         {text}
       </text>
@@ -76,8 +76,14 @@ export function FlowText({
         fontSize="100"
         className="flow-text-run"
         stroke={`url(#flow-${id})`}
-        strokeWidth={strokeWidth * 1.6}
+        strokeWidth={strokeWidth * 3.2}
       >
+        {text}
+      </text>
+      {/* Glyphs built from overlapping shapes would show their seams in
+          an outline. A fill in the page colour on top hides every inner
+          line (and the inner half of the strokes, hence their width). */}
+      <text x="0" y="0" fontSize="100" className="flow-text-cover">
         {text}
       </text>
     </svg>
