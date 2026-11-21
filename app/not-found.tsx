@@ -10,12 +10,12 @@ export default function NotFound() {
         That shot landed off the court.
       </h1>
       <p className="mt-4 max-w-md text-mist/70">
-        The page you were looking for isn&apos;t here. Let&apos;s get you back
+        Dinky looked everywhere, but this page isn&apos;t here. Let&apos;s get you back
         in the game.
       </p>
       <a
         href="/"
-        className="mt-10 inline-flex items-center gap-2 rounded-full bg-lime px-6 py-3 font-semibold text-night transition-transform hover:-translate-y-0.5"
+        className="mt-10 inline-flex items-center gap-2 rounded-xl bg-lime px-6 py-3 font-semibold text-night transition-transform hover:-translate-y-0.5"
       >
         Back to Sync
       </a>

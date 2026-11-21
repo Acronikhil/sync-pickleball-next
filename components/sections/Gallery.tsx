@@ -33,8 +33,8 @@ export function Gallery({ data }: { data: GallerySection }) {
           <p className="text-mist/75 md:text-lg">{data.body}</p>
           <p className="mt-4 flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-lilac">
             <span className="h-px w-10 bg-lilac/60" />
-            <span className="lg:hidden">Swipe to explore</span>
-            <span className="hidden lg:inline">Scroll to explore</span>
+            <span className="lg:hidden">Swipe for more photos</span>
+            <span className="hidden lg:inline">Keep scrolling, the photos glide by</span>
           </p>
         </div>
       </div>

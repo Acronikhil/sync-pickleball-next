@@ -744,33 +744,19 @@ export default function AdminPage() {
                         })
                       }
                     />
-                    <TextField
-                      label="Credit text"
-                      value={content.footer.creditPrefix}
-                      onChange={(creditPrefix) =>
-                        mutate((draft) => {
-                          draft.footer.creditPrefix = creditPrefix;
-                        })
-                      }
-                    />
-                    <TextField
-                      label="Credit name"
-                      value={content.footer.creditName}
-                      onChange={(creditName) =>
-                        mutate((draft) => {
-                          draft.footer.creditName = creditName;
-                        })
-                      }
-                    />
-                    <TextField
-                      label="Credit link"
-                      value={content.footer.creditHref}
-                      onChange={(creditHref) =>
-                        mutate((draft) => {
-                          draft.footer.creditHref = creditHref;
-                        })
-                      }
-                    />
+                    {/* The site credit is fixed in code (SiteFooter), so it's
+                        shown here for reference only. */}
+                    <div className="a-locked">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                        <rect x="5" y="11" width="14" height="10" rx="2" />
+                        <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                      </svg>
+                      <div>
+                        <span className="a-label">Site credit</span>
+                        <p>Designed &amp; built by Nikhil Dubey</p>
+                        <p className="a-hint">This line is locked and can&apos;t be changed here.</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </>

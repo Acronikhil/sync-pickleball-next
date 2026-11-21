@@ -118,9 +118,10 @@ export interface SocialLink {
 
 export interface FooterContent {
   copyright: string;
-  creditPrefix: string;
-  creditName: string;
-  creditHref: string;
+  /** Ignored. The site credit is fixed in code (see SiteFooter) so it can't be edited. */
+  creditPrefix?: string;
+  creditName?: string;
+  creditHref?: string;
 }
 
 /** One line of a two-column list: "Mon to Fri" / "6 am to 11 pm", "Cold coffee" / "₹180". */

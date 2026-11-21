@@ -28,6 +28,42 @@ function describe(social: SocialLink): { kind: string; value: string } {
   return { kind: "Link", value: label };
 }
 
+/**
+ * Who made the site. Fixed here in code on purpose, not in the editable
+ * content, so it can't be changed from the editor.
+ */
+const SITE_CREDIT = { name: "Nikhil Dubey", href: "https://dubeynikhil.in" };
+
+function SiteCredit() {
+  return (
+    <a
+      href={SITE_CREDIT.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group inline-flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] py-1.5 pl-1.5 pr-3.5 transition-colors duration-300 hover:border-lime/40 hover:bg-white/[0.06]"
+    >
+      <span className="grid size-9 place-items-center rounded-lg bg-lime text-night">
+        {/* A tiny paddle that takes a swing on hover. */}
+        <svg viewBox="0 0 24 24" className="size-5 origin-bottom transition-transform duration-300 group-hover:-rotate-[25deg]" aria-hidden="true">
+          <rect x="6" y="2" width="12" height="13" rx="5.5" fill="currentColor" />
+          <rect x="10.5" y="14" width="3" height="8" rx="1.4" fill="currentColor" />
+          <circle cx="20.5" cy="5" r="2" fill="currentColor" className="opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+        </svg>
+      </span>
+      <span className="text-left leading-tight">
+        <span className="block text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-mist/50">
+          Designed &amp; built by
+        </span>
+        <span className="block font-display text-sm font-bold text-cream">{SITE_CREDIT.name}</span>
+      </span>
+      <Icon
+        name="arrow-right"
+        className="size-4 -rotate-45 text-lime transition-transform duration-300 group-hover:rotate-0"
+      />
+    </a>
+  );
+}
+
 export function SiteFooter({
   socials,
   footer,
@@ -80,17 +116,7 @@ export function SiteFooter({
 
         <div className="mt-16 flex flex-col items-center justify-between gap-3 text-sm text-mist/50 md:flex-row">
           <p>{footer.copyright}</p>
-          <p>
-            {footer.creditPrefix} <span className="text-coral">♥</span> by{" "}
-            <a
-              href={footer.creditHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block py-3 text-cream underline decoration-lilac/50 underline-offset-4 hover:decoration-lime"
-            >
-              {footer.creditName}
-            </a>
-          </p>
+          <SiteCredit />
         </div>
       </div>
 

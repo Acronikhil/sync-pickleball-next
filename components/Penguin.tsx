@@ -1,7 +1,7 @@
 import type { ThemeSpec } from "@/lib/themes";
 
 /**
- * Sync's penguin — the mascot from the statue by the courts, drawn as SVG
+ * Dinky, Sync's penguin: the mascot from the statue by the courts, drawn as SVG
  * and kitted out in a club headband with the logo's lime sparkle, or in a
  * festival outfit (see lib/themes.ts).
  *

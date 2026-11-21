@@ -109,7 +109,7 @@ export function SiteNav({
           {book && (
             <a
               {...bookProps}
-              className="rounded-full bg-lime px-5 py-2.5 text-sm font-semibold text-night transition-transform hover:-translate-y-0.5"
+              className="rounded-xl bg-lime px-5 py-2.5 text-sm font-semibold text-night transition-transform hover:-translate-y-0.5"
             >
               {book.label}
             </a>

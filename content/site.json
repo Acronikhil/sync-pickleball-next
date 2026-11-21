@@ -101,7 +101,7 @@
           "id": "card-hangout",
           "image": {
             "src": "/assets/venue/penguin-night.webp",
-            "alt": "Penguin mascot and string-lit hangout area at night"
+            "alt": "Dinky the penguin beside the string-lit hangout area at night"
           },
           "title": "Pull Up,\n_Hang Out_",
           "body": "Green pockets and hangout zones to unwind, connect, or simply do nothing (and love it). And spacious parking, because stressing about it isn’t on today’s to-do list."
@@ -112,7 +112,7 @@
       "id": "gallery-inside",
       "type": "gallery",
       "heading": "Inside\n_Sync_",
-      "body": "Purple courts, string lights, a mural-lined café and one very friendly penguin. Here’s a peek before you visit.",
+      "body": "Purple courts, string lights, a mural-lined café and Dinky, our very friendly penguin. Here’s a peek before you visit.",
       "images": [
         {
           "id": "photo-signage",
@@ -134,9 +134,9 @@
           "id": "photo-penguin",
           "image": {
             "src": "/assets/venue/penguin-night.webp",
-            "alt": "Penguin mascot beside the string-lit walkway"
+            "alt": "Dinky the penguin statue beside the string-lit walkway"
           },
-          "caption": "Say hi to our penguin"
+          "caption": "Say hi to Dinky"
         },
         {
           "id": "photo-logo",

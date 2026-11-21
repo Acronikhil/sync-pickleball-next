@@ -76,7 +76,7 @@ export function PenguinBuddy({
           open ? "scale-100 opacity-100" : "pointer-events-none scale-75 opacity-0"
         }`}
       >
-        <p className="font-display text-base font-bold leading-tight">Hey! Courts fill up fast.</p>
+        <p className="font-display text-base font-bold leading-tight">Hi, I&apos;m Dinky! Courts fill up fast.</p>
         <p className="mt-1 text-sm text-night/70">Want me to hold one for you?</p>
         <div className="mt-3 flex items-center gap-2">
           <a
@@ -102,7 +102,7 @@ export function PenguinBuddy({
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
-        aria-label={open ? "Close the penguin's message" : "Ask the Sync penguin"}
+        aria-label={open ? "Close Dinky's message" : "Say hi to Dinky the penguin"}
         className={`group relative -mb-3 w-16 shrink-0 cursor-pointer border-0 bg-transparent p-0 transition-transform duration-500 md:w-24 ${
           // On phones it peeks in from the edge while closed, so it never
           // sits on top of a button.

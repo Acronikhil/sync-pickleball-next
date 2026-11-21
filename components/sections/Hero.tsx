@@ -34,12 +34,20 @@ export function Hero({ data }: { data: HeroSection }) {
 
       <div className="mx-auto grid w-full max-w-6xl items-end gap-12 lg:grid-cols-[1fr_auto]">
         <div>
+          {/* Court tag: a squared plate with a little court diagram. */}
           <p
             data-reveal
-            className="mb-5 inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-[0.65rem] font-medium uppercase tracking-[0.14em] text-mist sm:text-xs sm:tracking-[0.2em] backdrop-blur-md"
+            className="mb-6 inline-flex items-stretch overflow-hidden rounded-md border border-lime/40 bg-night/60 backdrop-blur-md"
           >
-            <span className="size-2 animate-pulse-dot rounded-full bg-lime" />
-            Pickleball Club &amp; Café · Indore
+            <span className="grid place-items-center bg-lime px-2.5 text-night">
+              <CourtGlyph />
+            </span>
+            <span className="flex flex-col justify-center px-3.5 py-1.5 leading-tight">
+              <span className="font-display text-[0.7rem] font-bold uppercase tracking-[0.06em] text-cream">
+                Pickleball Club &amp; Café
+              </span>
+              <span className="text-[0.72rem] text-mist/70">Indore, Madhya Pradesh</span>
+            </span>
           </p>
 
           <h1
@@ -75,7 +83,8 @@ export function Hero({ data }: { data: HeroSection }) {
           </div>
         </div>
 
-        {/* Rotating "book a court" badge wrapped around the logo. */}
+        {/* Scoreboard card. Pickleball games open with the call "0, 0, 2",
+            so it reads like the start of a game and links to booking. */}
         <a
           data-reveal="0.6"
           {...(book
@@ -84,36 +93,45 @@ export function Hero({ data }: { data: HeroSection }) {
                 ...(book.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {}),
               }
             : {})}
-          className="group relative hidden size-44 shrink-0 lg:block"
+          className="group hidden w-60 shrink-0 -rotate-3 rounded-2xl border border-white/15 bg-night/75 p-4 shadow-2xl shadow-black/40 backdrop-blur-md transition-transform duration-500 hover:rotate-0 lg:block"
           // Decorative duplicate of the Book Now button, so keep it out of
           // the tab order and away from screen readers.
           tabIndex={-1}
           aria-hidden="true"
         >
-          <svg viewBox="0 0 200 200" className="absolute inset-0 animate-spin-slow text-cream/80" aria-hidden="true">
-            <defs>
-              <path id="badge-circle" d="M100,100 m-82,0 a82,82 0 1,1 164,0 a82,82 0 1,1 -164,0" />
-            </defs>
-            <text className="fill-current font-sans text-[14px] font-bold uppercase tracking-[0.28em]">
-              <textPath href="#badge-circle">Book a court ✦ Serve ✦ Sip ✦ Repeat ✦</textPath>
-            </text>
-          </svg>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={data.logo.src}
-            alt=""
-            className="absolute inset-9 size-[6.5rem] rounded-full shadow-2xl shadow-court/60 transition-transform duration-500 group-hover:scale-110"
-          />
+          <span className="flex items-center justify-between text-[0.65rem] font-bold uppercase tracking-[0.16em] text-mist/60">
+            <span>Score call</span>
+            <span>Game 1</span>
+          </span>
+          <span className="mt-3 flex items-center justify-center gap-1.5">
+            {["0", "0", "2"].map((digit, index) => (
+              <span key={index} className="flex items-center gap-1.5">
+                {index > 0 && <span className="size-1.5 rounded-full bg-mist/40" />}
+                <span className="grid h-14 w-11 place-items-center rounded-lg bg-black/50 font-display text-3xl font-extrabold text-lime shadow-[inset_0_0_12px_rgb(216_246_90/0.15)] [text-shadow:0_0_14px_rgb(216_246_90/0.6)]">
+                  {digit}
+                </span>
+              </span>
+            ))}
+          </span>
+          <span className="mt-2 block text-center text-xs text-mist/70">Your serve</span>
+          <span className="mt-4 flex items-center justify-between rounded-xl bg-lime px-3.5 py-2.5 text-sm font-semibold text-night">
+            Book a court
+            <Icon name="arrow-right" className="size-4 transition-transform group-hover:translate-x-1" />
+          </span>
         </a>
       </div>
-
-      <a
-        href="#play"
-        className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 text-[0.65rem] uppercase tracking-[0.3em] text-mist/60 md:flex"
-      >
-        Scroll
-        <Icon name="arrow-down" className="size-4 animate-bounce" />
-      </a>
     </section>
+  );
+}
+
+/** A tiny pickleball court from above: the net across the middle, the
+    kitchen lines either side of it, and centre lines out to the baselines. */
+function CourtGlyph() {
+  return (
+    <svg viewBox="0 0 28 18" className="h-[18px] w-7" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+      <rect x="1" y="1" width="26" height="16" rx="1.5" />
+      <path d="M10 1v16M18 1v16M1 9h9M18 9h9" strokeWidth="1" />
+      <path d="M14 0v18" strokeWidth="1.4" strokeDasharray="1.6 1.2" />
+    </svg>
   );
 }
