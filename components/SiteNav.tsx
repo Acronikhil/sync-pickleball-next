@@ -80,7 +80,7 @@ export function SiteNav({
         <a href="#top" className="flex items-center gap-3" aria-label="Sync Pickleball, back to top">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={logo.src} alt={logo.alt} className="size-11 rounded-full" />
-          <span className="hidden font-display text-lg font-bold tracking-tight sm:block">
+          <span className="hidden font-display text-lg font-bold tracking-tight lg:block">
             Sync<span className="text-lilac">.</span>
           </span>
         </a>
