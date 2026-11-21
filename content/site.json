@@ -4,7 +4,7 @@
     "id": "hero",
     "type": "hero",
     "logo": {
-      "src": "/assets/logo.png",
+      "src": "/uploads/hero_image.png",
       "alt": "Sync logo"
     },
     "background": {
@@ -17,7 +17,7 @@
       {
         "id": "btn-hero-book",
         "label": "Book Now",
-        "href": "https://hudle.in/venues/sync-pickleball-club-and-cafe-indore/649928",
+        "href": "https://link.district.in/DSTRKT/lsdloq6u",
         "icon": "arrow-right",
         "newTab": true,
         "emphasis": "primary"
@@ -37,7 +37,7 @@
       "id": "feature-cafe",
       "type": "feature",
       "image": {
-        "src": "/assets/venue/cafe-murals.webp",
+        "src": "/uploads/1787509598834-1787509852436.jpg",
         "alt": "Open-air café seating beside the Sync mural wall"
       },
       "imageSide": "left",
