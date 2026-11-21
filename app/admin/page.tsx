@@ -41,7 +41,8 @@ import {
   SelectField,
   TextField,
 } from "@/components/admin/Fields";
-import { activeTheme, THEME_NAMES, THEMES } from "@/lib/themes";
+import { activeTheme, manualTheme, THEME_NAMES, THEMES } from "@/lib/themes";
+import { ThemeScheduleEditor } from "@/components/admin/ThemeScheduleEditor";
 import { InfoEditor } from "@/components/admin/InfoEditor";
 
 const DRAFT_KEY = "sync-admin-draft";
@@ -730,38 +731,72 @@ export default function AdminPage() {
             )}
 
             {area === "festival" && (
-              <div className="a-card">
-                <div className="a-card-body">
-                  <SelectField
-                    label="Theme"
-                    value={activeTheme(content).name}
-                    options={THEME_NAMES.map((name) => ({ value: name, label: THEMES[name].label }))}
-                    onChange={(name) =>
-                      mutate((draft) => {
-                        draft.theme = { name, message: draft.theme?.message ?? "" };
-                        delete draft.snow;
-                      })
-                    }
-                  />
-                  {activeTheme(content).name !== "none" && (
-                    <TextField
-                      label="Banner message"
-                      value={content.theme?.message ?? ""}
-                      hint={`Leave empty to use: “${THEMES[activeTheme(content).name].defaultMessage}”`}
-                      onChange={(message) =>
+              <>
+                {/* What visitors get today, and why. */}
+                <div className={`a-today ${activeTheme(content).name === "none" ? "" : "is-festive"}`} role="status">
+                  <span className="a-label">Showing today</span>
+                  <strong>{THEMES[activeTheme(content).name].label}</strong>
+                  <span className="a-hint">
+                    {activeTheme(content).scheduled
+                      ? "From your schedule below."
+                      : "Picked under Right now, as nothing is scheduled for today."}
+                  </span>
+                </div>
+
+                <h2 className="a-section-title">Right now</h2>
+                <div className="a-card">
+                  <div className="a-card-body">
+                    <SelectField
+                      label="Theme when nothing is scheduled"
+                      value={manualTheme(content).name}
+                      options={THEME_NAMES.map((name) => ({ value: name, label: THEMES[name].label }))}
+                      onChange={(name) =>
                         mutate((draft) => {
-                          draft.theme = { name: activeTheme(draft).name, message };
+                          draft.theme = { name, message: draft.theme?.message ?? "" };
                           delete draft.snow;
                         })
                       }
                     />
-                  )}
-                  <p className="a-hint">
-                    Changes the falling effect, the decorations, the banner at the top and
-                    the penguin&apos;s outfit. Set it back to None when the festival is over.
-                  </p>
+                    {manualTheme(content).name !== "none" && (
+                      <TextField
+                        label="Banner message"
+                        value={content.theme?.message ?? ""}
+                        hint={`Leave empty to use: “${THEMES[manualTheme(content).name].defaultMessage}”`}
+                        onChange={(message) =>
+                          mutate((draft) => {
+                            draft.theme = { name: manualTheme(draft).name, message };
+                            delete draft.snow;
+                          })
+                        }
+                      />
+                    )}
+                    <p className="a-hint">
+                      Usually None. Use this for a quick switch, or use the schedule below
+                      so festivals turn on and off by themselves.
+                    </p>
+                  </div>
                 </div>
-              </div>
+
+                <h2 className="a-section-title">Schedule</h2>
+                <div className="a-card">
+                  <div className="a-card-body">
+                    <ThemeScheduleEditor
+                      schedule={content.themeSchedule ?? []}
+                      onChange={(schedule) =>
+                        mutate((draft) => {
+                          draft.themeSchedule = schedule;
+                        })
+                      }
+                    />
+                    <p className="a-hint">
+                      A scheduled festival starts at midnight (India time) on its first day
+                      and ends after its last day. While one is live it replaces the Right
+                      now choice. If two overlap, the one that started later wins. Remember to
+                      publish after adding one.
+                    </p>
+                  </div>
+                </div>
+              </>
             )}
 
             {area === "contact" && (

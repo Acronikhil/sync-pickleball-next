@@ -7,7 +7,7 @@
  * these types, so adding a field here is how you make it editable.
  */
 
-import type { ThemeName } from "./themes";
+import type { ScheduledTheme, ThemeName } from "./themes";
 
 export const ICON_NAMES = [
   "none",
@@ -193,6 +193,8 @@ export interface SiteContent {
   };
   /** Hours, prices, menu and reviews. Optional: older content has none. */
   info?: ClubInfo;
+  /** Festivals booked for date ranges; they override `theme` while live. */
+  themeSchedule?: ScheduledTheme[];
   /** Superseded by `theme` ("christmas"); still read from older content. */
   snow?: {
     enabled: boolean;

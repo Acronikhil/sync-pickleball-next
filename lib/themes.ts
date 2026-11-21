@@ -132,16 +132,83 @@ export const THEMES: Record<ThemeName, ThemeSpec> = {
 };
 
 /**
- * The active theme for some content. Older content has no `theme` field but
- * may have the earlier `snow` switch, which meant Christmas.
+ * A festival booked for a date range. Dates are "YYYY-MM-DD" in India time,
+ * and both ends are included: start "2026-12-20", end "2026-12-26" is live
+ * for all seven days.
  */
-export function activeTheme(content: {
+export interface ScheduledTheme {
+  id: string;
+  name: ThemeName;
+  /** Banner text; empty uses the festival's default. */
+  message: string;
+  start: string;
+  end: string;
+}
+
+interface ThemedContent {
   theme?: { name: ThemeName; message: string };
+  themeSchedule?: ScheduledTheme[];
   snow?: { enabled: boolean };
-}): { name: ThemeName; spec: ThemeSpec; message: string } {
-  const name: ThemeName =
-    content.theme?.name ?? (content.snow?.enabled ? "christmas" : "none");
-  const spec = THEMES[name] ?? THEMES.none;
-  const message = content.theme?.message?.trim() || spec.defaultMessage;
-  return { name, spec, message };
+}
+
+/**
+ * Today's date in India as "YYYY-MM-DD". The site is built ahead of time, so
+ * this is the date of the build; the deploy workflow rebuilds every night
+ * just after midnight India time so scheduled festivals switch on time.
+ */
+export function todayInIndia(now: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+}
+
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+export type ScheduleStatus = "live" | "upcoming" | "ended" | "incomplete";
+
+export function scheduleStatus(entry: ScheduledTheme, today = todayInIndia()): ScheduleStatus {
+  if (!DATE.test(entry.start) || !DATE.test(entry.end) || entry.end < entry.start) return "incomplete";
+  if (today < entry.start) return "upcoming";
+  if (today > entry.end) return "ended";
+  return "live";
+}
+
+/** The scheduled festival live today. If several overlap, the one that started most recently wins. */
+export function liveScheduledTheme(
+  schedule: ScheduledTheme[] = [],
+  today = todayInIndia()
+): ScheduledTheme | undefined {
+  return schedule
+    .filter((entry) => entry.name !== "none" && scheduleStatus(entry, today) === "live")
+    .sort((a, b) => b.start.localeCompare(a.start))[0];
+}
+
+/**
+ * The theme picked by hand ("right now"), ignoring the schedule. Older
+ * content has no `theme` field but may have the earlier `snow` switch,
+ * which meant Christmas.
+ */
+export function manualTheme(content: ThemedContent): { name: ThemeName; message: string } {
+  return {
+    name: content.theme?.name ?? (content.snow?.enabled ? "christmas" : "none"),
+    message: content.theme?.message ?? "",
+  };
+}
+
+/**
+ * The theme visitors see on a given day: a scheduled festival if one covers
+ * that day, otherwise the one picked by hand.
+ */
+export function activeTheme(
+  content: ThemedContent,
+  today = todayInIndia()
+): { name: ThemeName; spec: ThemeSpec; message: string; scheduled?: ScheduledTheme } {
+  const scheduled = liveScheduledTheme(content.themeSchedule, today);
+  const picked = scheduled ?? manualTheme(content);
+  const spec = THEMES[picked.name] ?? THEMES.none;
+  const message = picked.message?.trim() || spec.defaultMessage;
+  return { name: picked.name, spec, message, scheduled };
 }

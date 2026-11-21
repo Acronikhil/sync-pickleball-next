@@ -9,6 +9,11 @@ on:
       - "oauth-worker/**"
       - "**/*.md"
   workflow_dispatch:
+  # Rebuild every night at 00:05 India time (18:35 UTC), so festivals on the
+  # editor's schedule switch on and off on their dates. The site is static,
+  # so the date is read when it's built.
+  schedule:
+    - cron: "35 18 * * *"
 
 permissions:
   contents: read

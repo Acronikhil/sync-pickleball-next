@@ -54,7 +54,9 @@ const TOPICS: { title: string; body: React.ReactNode }[] = [
     body: (
       <>
         <p>Pick a festival to dress the whole site up: falling snow or confetti, decorations, a banner at the top and an outfit for the penguin.</p>
-        <p>You can write your own banner message or leave it empty to use the default one. Remember to set it back to <strong>None</strong> when the festival is over.</p>
+        <p>The easiest way is the <strong>Schedule</strong>: add a festival with its first and last day and the site switches to it at midnight, then back on the day after it ends. You can book a whole year ahead.</p>
+        <p><strong>Right now</strong> is for a quick switch by hand. It applies whenever nothing is scheduled, so it is usually set to None.</p>
+        <p>Each festival can have its own banner message, or leave it empty to use the default one.</p>
       </>
     ),
   },
