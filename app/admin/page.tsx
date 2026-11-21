@@ -8,6 +8,8 @@ import {
   createId,
   createSection,
   emptyClubInfo,
+  DEFAULT_MASCOT_NAME,
+  mascotName,
   type AnySection,
   type BodySection,
   type SectionType,
@@ -55,6 +57,69 @@ const AREAS = [
 ] as const;
 
 type AreaId = (typeof AREAS)[number]["id"];
+
+/**
+ * Sets the penguin's name and swaps the old name for the new one wherever it
+ * appears in the page text (captions, intros, photo descriptions), so a
+ * rename doesn't leave stale mentions behind. Whole words only, and only
+ * once the old name is long enough not to match bits of other words.
+ */
+function renameMascot(draft: SiteContent, name: string) {
+  const previous = mascotName(draft);
+  draft.mascot = { name };
+  const next = name.trim();
+  if (previous.length < 3 || !next || next === previous) return;
+
+  const word = new RegExp(`\\b${previous.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "g");
+  const swap = (value: unknown): unknown => {
+    if (typeof value === "string") return value.replace(word, next);
+    if (Array.isArray(value)) return value.map(swap);
+    if (value && typeof value === "object") {
+      return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, swap(v)]));
+    }
+    return value;
+  };
+  draft.sections = swap(draft.sections) as BodySection[];
+  draft.hero = swap(draft.hero) as SiteContent["hero"];
+}
+
+/**
+ * The penguin's name field. The rename is applied when you finish typing
+ * (leave the field or press Enter), not on every keystroke: otherwise typing
+ * "Pickles" would first rename every mention to "P", and the next letters
+ * could no longer find them.
+ */
+function MascotNameField({ name, onRename }: { name: string; onRename: (name: string) => void }) {
+  const [value, setValue] = useState(name);
+  useEffect(() => setValue(name), [name]);
+  const commit = () => {
+    if (value.trim() && value.trim() !== name) onRename(value.trim());
+    else setValue(name);
+  };
+  return (
+    <div className="a-field">
+      <label className="a-label" htmlFor="mascot-name">
+        Penguin&apos;s name
+      </label>
+      <input
+        id="mascot-name"
+        className="a-input"
+        type="text"
+        value={value}
+        maxLength={24}
+        onChange={(event) => setValue(event.target.value)}
+        onBlur={commit}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") (event.target as HTMLInputElement).blur();
+        }}
+      />
+      <p className="a-hint">
+        Used in the penguin&apos;s greeting and on the page-not-found screen. When you
+        rename it, every mention of the old name on the site is updated too.
+      </p>
+    </div>
+  );
+}
 
 /** What each kind of new section looks like, for the "Add a section" cards. */
 const NEW_SECTIONS: { type: SectionType; label: string; hint: string }[] = [
@@ -764,6 +829,14 @@ export default function AdminPage() {
 
             {area === "settings" && (
               <>
+                <div className="a-card">
+                  <div className="a-card-body">
+                    <MascotNameField
+                      name={content.mascot?.name ?? DEFAULT_MASCOT_NAME}
+                      onRename={(name) => mutate((draft) => renameMascot(draft, name))}
+                    />
+                  </div>
+                </div>
                 <div className="a-card">
                   <div className="a-card-body">
                     <CheckboxField

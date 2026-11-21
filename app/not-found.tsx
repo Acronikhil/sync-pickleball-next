@@ -1,4 +1,6 @@
 import { Penguin } from "@/components/Penguin";
+import { mascotName } from "@/lib/content";
+import { siteContent } from "@/lib/site-content";
 
 /** A friendlier 404 than the default, with the penguin to point the way home. */
 export default function NotFound() {
@@ -10,7 +12,7 @@ export default function NotFound() {
         That shot landed off the court.
       </h1>
       <p className="mt-4 max-w-md text-mist/70">
-        Dinky looked everywhere, but this page isn&apos;t here. Let&apos;s get you back
+        {mascotName(siteContent)} looked everywhere, but this page isn&apos;t here. Let&apos;s get you back
         in the game.
       </p>
       <a

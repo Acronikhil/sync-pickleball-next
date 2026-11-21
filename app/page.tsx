@@ -6,6 +6,7 @@ import { PenguinBuddy } from "@/components/PenguinBuddy";
 import { PenguinGaze } from "@/components/PenguinGaze";
 import { FestiveParticles } from "@/components/FestiveParticles";
 import { siteContent } from "@/lib/site-content";
+import { mascotName } from "@/lib/content";
 import { activeTheme } from "@/lib/themes";
 
 /**
@@ -32,7 +33,7 @@ export default function HomePage() {
       {theme.particles !== "none" && (
         <FestiveParticles kind={theme.particles} icon={theme.toggleIcon} />
       )}
-      <PenguinBuddy book={book} theme={theme} />
+      <PenguinBuddy book={book} name={mascotName(siteContent)} theme={theme} />
       <PenguinGaze />
       <Motion />
     </div>

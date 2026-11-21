@@ -268,5 +268,8 @@
       "enabled": false,
       "items": []
     }
+  },
+  "mascot": {
+    "name": "Dinky"
   }
 }

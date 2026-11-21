@@ -47,7 +47,10 @@ export function CustomCursor() {
         duration: 0.35,
         ease: "power3.out",
       });
-      gsap.to(dot, { scale: next === "idle" ? 1 : 0, duration: 0.2 });
+      // The dot stays visible over links so there is always a precise point
+      // to aim with; it only hides behind a label badge or the paddle.
+      dot.dataset.mode = next;
+      gsap.to(dot, { scale: next === "idle" || next === "link" ? 1 : 0, duration: 0.2 });
     };
 
     const onMove = (event: PointerEvent) => {

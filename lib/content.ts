@@ -150,6 +150,13 @@ export interface ClubInfo {
   reviews: { enabled: boolean; items: Review[] };
 }
 
+export const DEFAULT_MASCOT_NAME = "Dinky";
+
+/** The penguin's name, falling back to Dinky. */
+export function mascotName(content: { mascot?: { name: string } }): string {
+  return content.mascot?.name.trim() || DEFAULT_MASCOT_NAME;
+}
+
 export function emptyClubInfo(): ClubInfo {
   return {
     hours: { enabled: false, rows: [] },
@@ -179,6 +186,10 @@ export interface SiteContent {
   theme?: {
     name: ThemeName;
     message: string;
+  };
+  /** The penguin mascot. Optional: older content has none (it's then Dinky). */
+  mascot?: {
+    name: string;
   };
   /** Hours, prices, menu and reviews. Optional: older content has none. */
   info?: ClubInfo;

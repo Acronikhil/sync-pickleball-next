@@ -99,9 +99,8 @@ export function Hero({ data }: { data: HeroSection }) {
           tabIndex={-1}
           aria-hidden="true"
         >
-          <span className="flex items-center justify-between text-[0.65rem] font-bold uppercase tracking-[0.16em] text-mist/60">
-            <span>Score call</span>
-            <span>Game 1</span>
+          <span className="block text-center text-[0.65rem] font-bold uppercase tracking-[0.16em] text-mist/60">
+            Every game starts at
           </span>
           <span className="mt-3 flex items-center justify-center gap-1.5">
             {["0", "0", "2"].map((digit, index) => (
@@ -113,7 +112,9 @@ export function Hero({ data }: { data: HeroSection }) {
               </span>
             ))}
           </span>
-          <span className="mt-2 block text-center text-xs text-mist/70">Your serve</span>
+          <span className="mt-2 block text-center text-xs leading-snug text-mist/70">
+            The opening score call in pickleball. Your serve!
+          </span>
           <span className="mt-4 flex items-center justify-between rounded-xl bg-lime px-3.5 py-2.5 text-sm font-semibold text-night">
             Book a court
             <Icon name="arrow-right" className="size-4 transition-transform group-hover:translate-x-1" />

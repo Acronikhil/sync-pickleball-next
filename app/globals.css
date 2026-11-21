@@ -331,9 +331,20 @@ body {
 
 /* Over links: a lime halo around the target rather than a filled disc, so
    the link text underneath stays readable. */
+/* Over links: a thin white ring and dot blended with "difference", so they
+   invert against whatever is underneath. They stay visible on the lime
+   buttons (where a lime cursor vanished) and on dark ones, and a ring
+   rather than a filled disc keeps the button text readable. */
 .cursor-ring[data-mode="link"] {
-  background: rgb(216 246 90 / 0.1);
-  border-color: var(--color-lime);
+  background: transparent;
+  border-color: #fff;
+  border-width: 1.5px;
+  mix-blend-mode: difference;
+}
+
+.cursor-dot[data-mode="link"] {
+  background: #fff;
+  mix-blend-mode: difference;
 }
 
 .cursor-ring[data-mode="label"] {
