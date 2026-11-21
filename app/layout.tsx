@@ -27,6 +27,17 @@ const instrument = Instrument_Serif({
   display: "swap",
 });
 
+const SHARE_TITLE = "Sync Pickleball Club & Café, Indore";
+const SHARE_DESCRIPTION =
+  "Indore's first premium pickleball club. Pro-grade courts, a cosy café and a friendly crowd. All levels welcome, book a court today!";
+const SHARE_IMAGE = {
+  url: "/og/sync-share.jpg",
+  width: 1200,
+  height: 630,
+  type: "image/jpeg",
+  alt: "Sync Pickleball Club & Café in Indore: purple courts at night, with Dinky the penguin",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.site.url),
   title: "Sync Pickleball | Premium Pickleball Club & Café in Indore",
@@ -45,19 +56,35 @@ export const metadata: Metadata = {
   robots: siteConfig.site.allowIndexing
     ? { index: true, follow: true }
     : { index: false, follow: false },
-  icons: { icon: "/assets/favicon_io_sync/favicon_2.ico" },
+  icons: {
+    icon: [
+      { url: "/assets/favicon_io_sync/favicon_2.ico", sizes: "any" },
+      { url: "/assets/favicon_io_sync/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/assets/favicon_io_sync/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: { url: "/assets/favicon_io_sync/apple-touch-icon.png", sizes: "180x180" },
+  },
   alternates: { canonical: "/" },
+  applicationName: "Sync Pickleball",
+  // What WhatsApp, Instagram, LinkedIn, Facebook and X show when someone
+  // shares a link. The card is 1200x630 (the size they all expect) and
+  // under 300 KB, which WhatsApp needs before it shows a big preview.
   openGraph: {
-    title: "Sync Pickleball | Club & Café, Indore",
-    description:
-      "Pro-grade courts, a cutesy café and a buzzing community. Book your slot today!",
-    images: ["/assets/venue/courts-night.jpg"],
+    type: "website",
+    siteName: "Sync Pickleball",
+    locale: "en_IN",
+    url: "/",
+    title: SHARE_TITLE,
+    description: SHARE_DESCRIPTION,
+    images: [SHARE_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Sync Pickleball | Club & Café, Indore",
-    images: ["/assets/venue/courts-night.jpg"],
+    title: SHARE_TITLE,
+    description: SHARE_DESCRIPTION,
+    images: [SHARE_IMAGE],
   },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
